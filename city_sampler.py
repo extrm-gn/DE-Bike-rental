@@ -3,10 +3,10 @@ import random
 
 def generate_city_country_dataframe(filepath):
 
-    df = pd.read_csv("Datasets/worldcities.csv")
+    df = pd.read_csv(filepath)
 
     #get the unique list of countries in the dataset
-    country_unique = list(set(df.country.to_list()))
+    country_unique = df['country'].unique().tolist()
 
     #group the dataframe by country
     country_group = df.groupby(by='country')
@@ -58,4 +58,3 @@ def generate_city_country_dataframe(filepath):
 
 if __name__ == "__main__":
     df = generate_city_country_dataframe("Datasets/worldcities.csv")
-    print(df)
