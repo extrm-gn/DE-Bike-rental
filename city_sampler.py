@@ -1,7 +1,7 @@
 import pandas as pd
 import random
 
-def generate_city_country_dataframe(dataset):
+def generate_city_country_dataframe(filepath):
 
     df = pd.read_csv("Datasets/worldcities.csv")
 
