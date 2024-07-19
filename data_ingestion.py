@@ -28,7 +28,7 @@ def generate_weather_data(year, month, day):
     temp_list = []
 
     #main loop to traverse the selected cities
-    for i in range(1):
+    for i in range(10):
 
         #initialized lat and long of the city
         lat = location_df['latitude'][i]
@@ -40,22 +40,30 @@ def generate_weather_data(year, month, day):
 
         #initializing the request module that makes accessing API available
         response = requests.get(url=API, params=parameters)
-        data = response.json()   
-        print(data)
+        data = response.json()  
+
         #get the mean temp of the city and round to first decimal place
-        #mean_temp_fahr = round((statistics.mean(data['hourly']['temperature_2m']) * 9/5) + 32, 1)
+        mean_temp_fahr = round((statistics.mean(data['hourly']['temperature_2m']) * 9/5) + 32, 1)
 
-        #dt = datetime.strftime(data['hourly'][i], '%Y-%m-%d')
-        #print(dt.year)
+        #get the first date string that comes up
+        time_str = data['hourly']['time'][0]
+
+        #format the date according to datetime module
+        time_dt = datetime.strptime(time_str, '%Y-%m-%dT%H:%M')
+        
         #append the mean temp to the placeholder temp list
-        #temp_list.append(mean_temp_fahr)
+        temp_list.append({'AvgTemperature':mean_temp_fahr, 'Month':time_dt.month,
+                          'Day':time_dt.day, 'Year':time_dt.year, 'latitude':lat,
+                          'longitude':long})
 
+    #make the list placeholder as a dataframe
+    temp_df = pd.DataFrame(temp_list)
 
-    location_df['AvgTemperature'] = pd.Series(temp_list)
-    #print(location_df[0:10])
+    #merge the city location df and the temp df
+    final_weather_df = pd.merge(location_df, temp_df, on=['latitude', 'longitude'])
 
-    return location_df
+    return final_weather_df
 
 if __name__ == "__main__":
     final_weather_df = generate_weather_data(2023, 10, 6)
-    #print(final_weather_df)
+    print(final_weather_df)
