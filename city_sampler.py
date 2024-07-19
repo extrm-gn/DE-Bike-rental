@@ -1,55 +1,61 @@
 import pandas as pd
 import random
 
-df = pd.read_csv("Datasets/worldcities.csv")
+def generate_city_country_dataframe(dataset):
 
-#get the unique list of countries in the dataset
-country_unique = list(set(df.country.to_list()))
+    df = pd.read_csv("Datasets/worldcities.csv")
 
-#group the dataframe by country
-country_group = df.groupby(by='country')
+    #get the unique list of countries in the dataset
+    country_unique = list(set(df.country.to_list()))
 
-#initialized the placeholder for the selected city in a country
-selected_city_country = []
+    #group the dataframe by country
+    country_group = df.groupby(by='country')
 
-#counter for the country to keep in track the countries selected
-country_counter = 0
+    #initialized the placeholder for the selected city in a country
+    selected_city_country = []
 
-#main for loop to handle each selected country
-for i in range(0, len(country_unique)):
-    #select a country from the unique list of countries
-    selected_country = country_unique[country_counter]
+    #counter for the country to keep in track the countries selected
+    country_counter = 0
 
-    #select a country from the dataframe group
-    countries =  country_group.get_group(selected_country)
+    #main for loop to handle each selected country
+    for i in range(0, len(country_unique)):
+        #select a country from the unique list of countries
+        selected_country = country_unique[country_counter]
 
-    if len(countries) > 2:
-        for i in range(2):
-            #pick a random city index
-            random_city = random.randint(0,len(countries) - 1)
+        #select a country from the dataframe group
+        countries =  country_group.get_group(selected_country)
 
-            #initialized the city name, latitude, and longitude of selected city
-            city_name = countries['city'].iloc[random_city]
-            latitude = countries['lat'].iloc[random_city]
-            longitude = countries['lng'].iloc[random_city]
+        if len(countries) > 2:
+            for i in range(2):
+                #pick a random city index
+                random_city = random.randint(0,len(countries) - 1)
 
-            #add the selected country and city to the list
-            selected_city_country.append({'city':city_name, 'country':selected_country, 
-                                          'latitude':latitude, 'longitude':longitude})
-    else:
-        #since there are only <2 cities in a country, just append the available city
-        for i in range(len(countries)):
+                #initialized the city name, latitude, and longitude of selected city
+                city_name = countries['city'].iloc[random_city]
+                latitude = countries['lat'].iloc[random_city]
+                longitude = countries['lng'].iloc[random_city]
 
-            #initialized the city name, latitude, and longitude of selected city
-            city_name = countries['city'].iloc[i]
-            latitude = countries['lat'].iloc[i]
-            longitude = countries['lng'].iloc[i]
+                #add the selected country and city to the list
+                selected_city_country.append({'city':city_name, 'country':selected_country, 
+                                            'latitude':latitude, 'longitude':longitude})
+        else:
+            #since there are only <2 cities in a country, just append the available city
+            for i in range(len(countries)):
 
-            #add the selected country and city to the list
-            selected_city_country.append({'city':city_name, 'country':selected_country, 
-                                          'latitude':latitude, 'longitude':longitude})
+                #initialized the city name, latitude, and longitude of selected city
+                city_name = countries['city'].iloc[i]
+                latitude = countries['lat'].iloc[i]
+                longitude = countries['lng'].iloc[i]
 
-    country_counter += 1
+                #add the selected country and city to the list
+                selected_city_country.append({'city':city_name, 'country':selected_country, 
+                                            'latitude':latitude, 'longitude':longitude})
 
-print(pd.DataFrame(selected_city_country))
-print(len(country_unique))
+        country_counter += 1
+
+    return pd.DataFrame(selected_city_country)
+
+
+if __name__ == "__main__":
+    df = generate_city_country_dataframe("Datasets/worldcities.csv")
+    print(df)
