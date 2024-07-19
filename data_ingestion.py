@@ -7,38 +7,55 @@ from city_sampler import generate_city_country_dataframe
 #dict_keys(['latitude', 'longitude', 'generationtime_ms', 
 # 'utc_offset_seconds', 'timezone', 'timezone_abbreviation', 'elevation', 'hourly_units', 'hourly']
 
-location_df = generate_city_country_dataframe("Datasets/worldcities.csv")
+def generate_weather_data(year, month, day):
 
-API = "https://archive-api.open-meteo.com/v1/archive"
+    #check if month is less than 10, if so then add 0 in the beginning
+    if month < 10:
+        month = '0' + str(month)
+    
+    #check if day is less than 10, if so then add 0 in the beginning
+    if day < 10:
+        day = '0' + str(day)
+    
+    #concatenate the year month and day
+    date_weather = f'{year}-{month}-{day}'
 
-#placeholder for the temperature that would be appended to the location_df once loop is done
-temp_list = []
+    location_df = generate_city_country_dataframe("Datasets/worldcities.csv")
 
-#main loop to traverse the selected cities
-for i in range(2):
+    API = "https://archive-api.open-meteo.com/v1/archive"
 
-    #initialized lat and long of the city
-    lat = location_df['latitude'][i]
-    long = location_df['longitude'][i]
+    #placeholder for the temperature that would be appended to the location_df once loop is done
+    temp_list = []
 
-    #parameters for the API
-    parameters = {"longitude":long,"latitude":lat,"start_date":"2024-07-10",
-                "end_date":"2024-07-10","hourly":"temperature_2m"}
+    #main loop to traverse the selected cities
+    for i in range(1):
 
-    #initializing the request module that makes accessing API available
-    response = requests.get(url=API, params=parameters)
-    data = response.json()   
+        #initialized lat and long of the city
+        lat = location_df['latitude'][i]
+        long = location_df['longitude'][i]
 
-    #get the mean temp of the city and round to first decimal place
-    mean_temp_fahr = round((statistics.mean(data['hourly']['temperature_2m']) * 9/5) + 32, 1)
+        #parameters for the API
+        parameters = {"longitude":long,"latitude":lat,"start_date":date_weather,
+                    "end_date":date_weather,"hourly":"temperature_2m"}
 
-    print(data['hourly'])
-    dt = datetime.strftime(data['hourly'][i], '%Y-%m-%d')
-    #append the mean temp to the placeholder temp list
-    temp_list.append(mean_temp_fahr)
+        #initializing the request module that makes accessing API available
+        response = requests.get(url=API, params=parameters)
+        data = response.json()   
+        print(data)
+        #get the mean temp of the city and round to first decimal place
+        #mean_temp_fahr = round((statistics.mean(data['hourly']['temperature_2m']) * 9/5) + 32, 1)
 
-    print(data['latitude'], lat)
+        #dt = datetime.strftime(data['hourly'][i], '%Y-%m-%d')
+        #print(dt.year)
+        #append the mean temp to the placeholder temp list
+        #temp_list.append(mean_temp_fahr)
 
 
-location_df['AvgTemperature'] = pd.Series(temp_list)
-print(location_df[0:10])
+    location_df['AvgTemperature'] = pd.Series(temp_list)
+    #print(location_df[0:10])
+
+    return location_df
+
+if __name__ == "__main__":
+    final_weather_df = generate_weather_data(2023, 10, 6)
+    #print(final_weather_df)
