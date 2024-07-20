@@ -18,7 +18,7 @@ def generate_city_country_dataframe(filepath):
     country_counter = 0
 
     #main for loop to handle each selected country
-    for i in range(0, len(country_unique)):
+    for i in range(0, 10):
         #select a country from the unique list of countries
         selected_country = country_unique[country_counter]
 
