@@ -2,12 +2,16 @@ import requests
 import pandas as pd
 import statistics
 from datetime import datetime
+import os
+from dotenv import load_dotenv
 from city_sampler import generate_city_country_dataframe
 
 #dict_keys(['latitude', 'longitude', 'generationtime_ms', 
 # 'utc_offset_seconds', 'timezone', 'timezone_abbreviation', 'elevation', 'hourly_units', 'hourly']
 
 def generate_weather_data(year, month, day):
+
+    load_dotenv()
 
     #check if month is less than 10, if so then add 0 in the beginning
     if month < 10:
@@ -22,8 +26,9 @@ def generate_weather_data(year, month, day):
 
     location_df = generate_city_country_dataframe("Datasets/worldcities.csv")
 
-    API = "https://archive-api.open-meteo.com/v1/archive"
-
+    API = os.getenv('WEATHER_API')
+    print(f"API URL: {API}")
+    print(f" here {os.environ.get('WEATHER_API')}")
     #placeholder for the temperature that would be appended to the location_df once loop is done
     temp_list = []
 
