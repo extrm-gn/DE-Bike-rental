@@ -10,7 +10,7 @@ from city_sampler import generate_city_country_dataframe
 # 'utc_offset_seconds', 'timezone', 'timezone_abbreviation', 'elevation', 'hourly_units', 'hourly']
 
 def generate_weather_data(year, month, day):
-
+    #loads variables in the env
     load_dotenv()
 
     #check if month is less than 10, if so then add 0 in the beginning
@@ -26,9 +26,9 @@ def generate_weather_data(year, month, day):
 
     location_df = generate_city_country_dataframe("Datasets/worldcities.csv")
 
+    #gets api key in the env file then initialize it in API var
     API = os.getenv('WEATHER_API')
-    print(f"API URL: {API}")
-    print(f" here {os.environ.get('WEATHER_API')}")
+
     #placeholder for the temperature that would be appended to the location_df once loop is done
     temp_list = []
 
@@ -67,8 +67,18 @@ def generate_weather_data(year, month, day):
     #merge the city location df and the temp df
     final_weather_df = pd.merge(location_df, temp_df, on=['latitude', 'longitude'])
 
+    #check if city_weather.csv is already available
+    if os.path.exists('Datasets/city_weather.csv'):
+        #put df to csv format in append mode
+        final_weather_df.to_csv('Datasets/city_weather.csv', sep=',', mode='a',
+                            index=False, header=False)
+    else:
+        #put df to csv format if city_weather is not present
+        final_weather_df.to_csv('Datasets/city_weather.csv',
+                                index=False, header=True)
+
+
     return final_weather_df
 
 if __name__ == "__main__":
     final_weather_df = generate_weather_data(2023, 10, 6)
-    print(final_weather_df)
