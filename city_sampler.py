@@ -4,7 +4,7 @@ import os
 from dotenv import load_dotenv
 
 
-def generate_city_country_dataframe(filepath):
+def select_cities_to_csv(filepath):
 
     df = pd.read_csv(filepath)
 
@@ -69,4 +69,4 @@ if __name__ == "__main__":
 
     #get the filepath of the location and city name 
     filepath = os.getenv('WORLD_CITIES_FILE')
-    generate_city_country_dataframe(f"{filepath}")
+    select_cities_to_csv(f"{filepath}")
