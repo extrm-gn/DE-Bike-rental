@@ -62,6 +62,8 @@ def select_cities_to_csv(filepath):
     #exported the dataframe into a csv so other file could access it
     selected_city_df.to_csv('Datasets/selected_city.csv', mode='w', index=False)
 
+    print("Done with sampling")
+
 
 if __name__ == "__main__":
     #load environment variables
@@ -69,4 +71,5 @@ if __name__ == "__main__":
 
     #get the filepath of the location and city name 
     filepath = os.getenv('WORLD_CITIES_FILE')
+    print(f"File path from environment variable: {filepath}")
     select_cities_to_csv(f"{filepath}")
