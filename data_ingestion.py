@@ -4,10 +4,7 @@ import statistics
 from datetime import datetime
 import os
 from dotenv import load_dotenv
-from city_sampler import generate_city_country_dataframe
-
-#dict_keys(['latitude', 'longitude', 'generationtime_ms', 
-# 'utc_offset_seconds', 'timezone', 'timezone_abbreviation', 'elevation', 'hourly_units', 'hourly']
+from city_sampler import select_cities_to_csv
 
 def generate_weather_data(year, month, day):
     #loads variables in the env
@@ -24,7 +21,8 @@ def generate_weather_data(year, month, day):
     #concatenate the year month and day
     date_weather = f'{year}-{month}-{day}'
 
-    location_df = generate_city_country_dataframe("Datasets/worldcities.csv")
+    #read the selected_city.csv from the city_sampler as a dataframe
+    location_df = pd.DataFrame('selected_city.csv')
 
     #gets api key in the env file then initialize it in API var
     API = os.getenv('WEATHER_API')
@@ -75,7 +73,7 @@ def generate_weather_data(year, month, day):
     else:
         #put df to csv format if city_weather is not present
         final_weather_df.to_csv('Datasets/city_weather.csv',
-                                index=False, header=True)
+                                index=False, header=True, index = False)
 
 
     return final_weather_df
