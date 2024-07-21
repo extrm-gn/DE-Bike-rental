@@ -1,3 +1,6 @@
 .env
 
 __pycache__/
+
+Datasets/city_weather.csv
+Datasets/selected_city.csv
