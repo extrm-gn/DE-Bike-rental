@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  city_sampler:
+    build: .
+    container_name: city_sampler
+    volumes:
+    -  ./Datasets:/app/Datasets
+    env_file:
+    -  .env 
+    command: python city_sampler.py
+  
+  data_ingestion:
+    build: .
+    container_name: data_ingestion
+    volumes:
+    -  ./data:/app/Datasets
+    depends_on:
+      - city_sampler
+    env_file:
+      - .env
+    command: python data_ingestion.py
