@@ -71,5 +71,4 @@ if __name__ == "__main__":
 
     #get the filepath of the location and city name 
     filepath = os.getenv('WORLD_CITIES_FILE')
-    print(f"File path from environment variable: {filepath}")
     select_cities_to_csv(f"{filepath}")

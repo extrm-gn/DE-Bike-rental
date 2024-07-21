@@ -21,7 +21,7 @@ def generate_weather_data(year, month, day):
     date_weather = f'{year}-{month}-{day}'
 
     #read the selected_city.csv from the city_sampler as a dataframe
-    location_df = pd.read_csv('/app/Datasets/selected_city.csv')
+    location_df = pd.read_csv('Datasets/selected_city.csv')
 
     #gets api key in the env file then initialize it in API var
     API = os.getenv('WEATHER_API')
