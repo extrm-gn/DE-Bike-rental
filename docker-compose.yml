@@ -14,7 +14,7 @@ services:
     build: .
     container_name: data_ingestion
     volumes:
-    -  ./data:/app/Datasets
+    -  ./Datasets:/app/Datasets
     depends_on:
       - city_sampler
     env_file:
