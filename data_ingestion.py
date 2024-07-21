@@ -80,3 +80,5 @@ def generate_weather_data(year, month, day):
 
 if __name__ == "__main__":
     final_weather_df = generate_weather_data(2023, 10, 6)
+
+    print(pd.read_csv('Datasets/city_weather.csv'))
