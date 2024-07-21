@@ -1,5 +1,8 @@
 import pandas as pd
 import random
+import os
+from dotenv import load_dotenv
+
 
 def generate_city_country_dataframe(filepath):
 
@@ -53,8 +56,17 @@ def generate_city_country_dataframe(filepath):
 
         country_counter += 1
 
-    return pd.DataFrame(selected_city_country)
+    #made the city and its location into a dataframe
+    selected_city_df = pd.DataFrame(selected_city_country)
+
+    #exported the dataframe into a csv so other file could access it
+    selected_city_df.to_csv('Datasets/selected_city.csv', mode='w', index=False)
 
 
 if __name__ == "__main__":
-    df = generate_city_country_dataframe("Datasets/worldcities.csv")
+    #load environment variables
+    load_dotenv()
+
+    #get the filepath of the location and city name 
+    filepath = os.getenv('WORLD_CITIES_FILE')
+    generate_city_country_dataframe(f"{filepath}")
