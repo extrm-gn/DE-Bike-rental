@@ -18,7 +18,7 @@ def table_schema():
                             activation_date DATE,
                             expiration_date DATE,
                             status VARCHAR(10)
-                            )''')
+                            );''')
 
     # SQL command to create city dimension
     city_dimension = text('''CREATE TABLE IF NOT EXISTS city_table (
@@ -32,7 +32,7 @@ def table_schema():
                         activation_date DATE,
                         expiration_date DATE,
                         status VARCHAR(10)
-                        )''')
+                        );''')
 
     # SQL command to create city and country fact table
     city_country_fact = text('''CREATE TABLE IF NOT EXISTS city_country_table (
@@ -41,7 +41,7 @@ def table_schema():
                            city_id INT,
                            mean_temperature NUMERIC(10,6),
                            FOREIGN KEY(country_id) REFERENCES country_table(country_id),
-                           FOREIGN KEY(city_id) REFERENCES city_table(city_id) )''')
+                           FOREIGN KEY(city_id) REFERENCES city_table(city_id) );''')
 
     return country_dimension, city_dimension, city_country_fact
 
