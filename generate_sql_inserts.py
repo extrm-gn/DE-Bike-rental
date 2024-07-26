@@ -14,7 +14,10 @@ def country_data_to_sql(csv_filename, table_name):
     sql_table_columns = ['country_id', 'country_name', 'country_region', 'country_population', 'country_population_density',
                          'country_GDP', 'country_GDP_per_capita', 'country_surface_area', 'country_sex_ratio', 
                          'activation_date', 'expiration_date', 'status']
-   
+    
+    sql_table_columns_string = '''country_id, country_name, country_region, country_population, country_population_density,
+                         country_GDP, country_GDP_per_capita, country_surface_area, country_sex_ratio, 
+                         activation_date, expiration_date, status'''
 
     #transformed the sql table columns into a string and removed the square brackets
     sql_table_columns = str(sql_table_columns)
@@ -36,7 +39,7 @@ def country_data_to_sql(csv_filename, table_name):
         country_values = [str(value).replace("'", "''").strip() for value in country_values]
         country_values = "', '".join(country_values)
 
-        sql_command = f"""INSERT INTO {table_name} ({str(sql_table_columns)}) VALUES ({id_counter}, 
+        sql_command = f"""INSERT INTO {table_name} ({sql_table_columns_string}) VALUES ({id_counter}, 
               '{country_values}', '01/01/2017', '01/01/9999', 'ACTIVE');"""
         id_counter += 1
 
