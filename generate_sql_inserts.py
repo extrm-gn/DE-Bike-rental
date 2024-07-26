@@ -1,6 +1,7 @@
 import pandas as pd
 import datetime
 
+
 def country_data_to_sql(csv_filename, table_name):
     df = pd.read_csv(csv_filename)
 
@@ -42,16 +43,25 @@ def country_data_to_sql(csv_filename, table_name):
         #add the sql_command for that particular row to the total sql_commands
         sql_commands.append(sql_command)
 
-        return sql_commands
+    return sql_commands
 
 
-
-
-
+def save_to_sql_file(insert_statements, file_path):
+    """
+    Save SQL INSERT statements to a .sql file.
+    """
+    with open(file_path, 'w') as f:
+        for statement in insert_statements:
+            f.write(statement + '\n')
 
 
 def main():
-    country_data_to_sql('Datasets/country_profile_variables.csv', 'country_table')
+    country_sql_insert_filename = 'country_table_inserts.sql'
+
+    country_insert_statements = country_data_to_sql('Datasets/country_profile_variables.csv', 'country_table')
+
+    save_to_sql_file(country_insert_statements, country_sql_insert_filename)
+    print('done')
 
 if __name__ == '__main__':
     main()
