@@ -1,5 +1,5 @@
 import pandas as pd
-import datetime
+import numpy as np
 
 
 def country_data_to_sql(csv_filename, table_name):
@@ -100,15 +100,15 @@ def city_data_to_sql(csv_filename, table_name):
 
         # Handle integer values
         city_values_int = value[city_columns_int]
-        city_values_int = int(city_values_int) if not pd.isnull(city_values_int) or city_values_int == 'nan' else 0
-        
+        city_values_int = int(city_values_int) if not pd.isnull(city_values_int) or city_values_int == 'nan' else 'NULL'
+        print(city_values_int)
         # Handle float values with error handling
-        city_values_float = [value[col] for col in city_columns_float]
+        city_values_float = [value[col] for col in city_columns_float ]
         city_values_float = [safe_float_conversion(val) for val in city_values_float]
         city_values_float = ", ".join(city_values_float)
         
         sql_command = f"""INSERT INTO {table_name} ({sql_table_columns_string}) VALUES ({id_counter}, 
-              '{city_values_str}', {value[city_columns_int]}, {city_values_float}, '01/01/2017', '01/01/9999', 'ACTIVE');"""
+              '{city_values_str}', {city_values_int}, {city_values_float}, '01/01/2017', '01/01/9999', 'ACTIVE');"""
         id_counter += 1
 
         #add the sql_command for that particular row to the total sql_commands
@@ -137,7 +137,8 @@ def safe_float_conversion(value):
 def transform_data(df):
 
     #drop null values
-    df = df.dropna()
+    df['population'] = df['population'].replace('nan', 'hehe')
+
     
     return df
 
