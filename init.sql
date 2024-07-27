@@ -31,6 +31,7 @@ CREATE TABLE IF NOT EXISTS city_country_table (
     country_id INT,
     city_id INT,
     mean_temperature NUMERIC(10,6),
+    date_gathered DATE,
     FOREIGN KEY(country_id) REFERENCES country_table(country_id),
     FOREIGN KEY(city_id) REFERENCES city_table(city_id)
 );
