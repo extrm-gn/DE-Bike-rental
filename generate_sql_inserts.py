@@ -149,7 +149,8 @@ def generate_temp_fact_df(temp_csv_filename, city_csv_filename, country_csv_file
 def temp_data_to_sql(df, table_name):
     
     #add a date column
-    df['date_gathered'] = pd.to_datetime(df[['Year', 'Month', 'Day']], errors='coerce')
+    df['date_gathered'] = pd.to_datetime(df[['Year', 'Month', 'Day']], errors='coerce').dt.strftime('%Y-%m-%d')
+
 
     #list for the column names in the sql table
     sql_table_columns = ['city_id', 'country_id', 'mean_temperature', 'date_gathered']
@@ -163,11 +164,8 @@ def temp_data_to_sql(df, table_name):
     #this loop would iterate each rows
     for index, value in df.iterrows():
 
-        # Handle integer values
-        city_values_int = value[['city_id', 'country_id']]
-        
-        sql_command = f"""INSERT INTO {table_name} ({sql_table_columns_string}) VALUES ({city_values_int}, 
-        {value['AvgTemperature']}, {value['date_gathered']});"""
+        sql_command = f"""INSERT INTO {table_name} ({sql_table_columns_string}) VALUES ({value['city_id']}, 
+        {value['country_id']}, {value['AvgTemperature']}, {value['date_gathered']});"""
 
         #add the sql_command for that particular row to the total sql_commands
         sql_commands.append(sql_command)
