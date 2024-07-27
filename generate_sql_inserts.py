@@ -156,7 +156,7 @@ def temp_data_to_sql(df, table_name):
     sql_table_columns = ['city_id', 'country_id', 'mean_temperature', 'date_gathered']
 
     
-    sql_table_columns_string = '''city_id, country_id, mean_temperature date_gathered'''
+    sql_table_columns_string = '''city_id, country_id, mean_temperature, date_gathered'''
 
     #place holder for the sql commands
     sql_commands = []
@@ -165,7 +165,7 @@ def temp_data_to_sql(df, table_name):
     for index, value in df.iterrows():
 
         sql_command = f"""INSERT INTO {table_name} ({sql_table_columns_string}) VALUES ({value['city_id']}, 
-        {value['country_id']}, {value['AvgTemperature']}, {value['date_gathered']});"""
+        {value['country_id']}, {value['AvgTemperature']}, '{value['date_gathered']}');"""
 
         #add the sql_command for that particular row to the total sql_commands
         sql_commands.append(sql_command)
