@@ -117,7 +117,7 @@ def city_data_to_sql(csv_filename, table_name):
     return sql_commands
 
 
-def generate_temp_fact_table(temp_csv_filename, city_csv_filename, country_csv_filename, table_name):
+def generate_temp_fact_df(temp_csv_filename, city_csv_filename, country_csv_filename, table_name):
     temp_df = pd.read_csv(temp_csv_filename)
     city_df = pd.read_csv(city_csv_filename)
     country_df = pd.read_csv(country_csv_filename)
@@ -141,9 +141,38 @@ def generate_temp_fact_table(temp_csv_filename, city_csv_filename, country_csv_f
     #merge the merged temp_df and city_df with the country_df
     fact_df = pd.merge(city_temp_merge_df,country_df, right_on = ['country'],
                                   left_on = ['country'])
-    print(fact_df)
+    fact_df = fact_df[['city_id', 'country_id', 'Day','Month', 'Year', 'AvgTemperature']]
+
+    return fact_df
 
 
+def temp_data_to_sql(df, table_name):
+    
+    #add a date column
+    df['date_gathered'] = pd.to_datetime(df[['Year', 'Month', 'Day']], errors='coerce')
+
+    #list for the column names in the sql table
+    sql_table_columns = ['city_id', 'country_id', 'mean_temperature', 'date_gathered']
+
+    
+    sql_table_columns_string = '''city_id, country_id, mean_temperature date_gathered'''
+
+    #place holder for the sql commands
+    sql_commands = []
+
+    #this loop would iterate each rows
+    for index, value in df.iterrows():
+
+        # Handle integer values
+        city_values_int = value[['city_id', 'country_id']]
+        
+        sql_command = f"""INSERT INTO {table_name} ({sql_table_columns_string}) VALUES ({city_values_int}, 
+        {value['AvgTemperature']}, {value['date_gathered']});"""
+
+        #add the sql_command for that particular row to the total sql_commands
+        sql_commands.append(sql_command)
+
+    return sql_commands
 
 
 def save_to_sql_file(insert_statements, file_path):
@@ -180,9 +209,10 @@ def main():
 
     #save_to_sql_file(country_insert_statements, country_sql_insert_filename)
     #save_to_sql_file(city_insert_statements, city_sql_insert_filename)
-    generate_temp_fact_table('Datasets/city_weather.csv', 'Datasets/worldcities.csv', 'Datasets/country_profile_variables.csv', 
+    temp_fact_df = generate_temp_fact_df('Datasets/city_weather.csv', 'Datasets/worldcities.csv', 'Datasets/country_profile_variables.csv', 
                              'Datasets/city_country_table')
-    print('done')
+    city_country_inserts = temp_data_to_sql(temp_fact_df, 'city_country_table')
+    save_to_sql_file(city_country_inserts, 'zcity_country_table_inserts.sql')
 
 if __name__ == '__main__':
     main()
