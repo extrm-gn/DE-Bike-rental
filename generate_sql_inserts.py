@@ -101,7 +101,7 @@ def city_data_to_sql(csv_filename, table_name):
         # Handle integer values
         city_values_int = value[city_columns_int]
         city_values_int = int(city_values_int) if not pd.isnull(city_values_int) or city_values_int == 'nan' else 'NULL'
-        print(city_values_int)
+        
         # Handle float values with error handling
         city_values_float = [value[col] for col in city_columns_float ]
         city_values_float = [safe_float_conversion(val) for val in city_values_float]
@@ -115,6 +115,29 @@ def city_data_to_sql(csv_filename, table_name):
         sql_commands.append(sql_command)
 
     return sql_commands
+
+
+def generate_temp_fact_table(temp_csv_filename, city_csv_filename, country_csv_filename, table_name):
+    temp_df = pd.read_csv(temp_csv_filename)
+    city_df = pd.read_csv(city_csv_filename)
+    country_df = pd.read_csv(country_csv_filename)
+
+    #determine the needed columns for city and country df
+    city_columns = ['city', 'iso3', 'capital', 'population', 'lat', 'lng']
+    country_columns = ['country', 'Region', 'Population in thousands (2017)', 'Population density (per km2, 2017)',
+                       'GDP: Gross domestic product (million current US$)', 'GDP per capita (current US$)', 
+                       'Surface area (km2)', 'Sex ratio (m per 100 f, 2017)']
+
+    #set each dataframes to only show the needed columns 
+    city_df = city_df[city_columns]
+    country_df = country_df[country_columns]
+
+    print(city_df.reset_index().rename(columns = {'index':'id'}).head(10))
+
+
+    
+
+
 
 
 def save_to_sql_file(insert_statements, file_path):
@@ -149,8 +172,10 @@ def main():
     country_insert_statements = country_data_to_sql('Datasets/country_profile_variables.csv', 'country_table')
     city_insert_statements = city_data_to_sql('Datasets/worldcities.csv', 'city_table')
 
-    save_to_sql_file(country_insert_statements, country_sql_insert_filename)
-    save_to_sql_file(city_insert_statements, city_sql_insert_filename)
+    #save_to_sql_file(country_insert_statements, country_sql_insert_filename)
+    #save_to_sql_file(city_insert_statements, city_sql_insert_filename)
+    generate_temp_fact_table('Datasets/city_weather.csv', 'Datasets/worldcities.csv', 'Datasets/country_profile_variables.csv', 
+                             'Datasets/city_country_table')
     print('done')
 
 if __name__ == '__main__':
