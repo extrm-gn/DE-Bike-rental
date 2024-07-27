@@ -210,7 +210,7 @@ def main():
     temp_fact_df = generate_temp_fact_df('Datasets/city_weather.csv', 'Datasets/worldcities.csv', 'Datasets/country_profile_variables.csv', 
                              'Datasets/city_country_table')
     city_country_inserts = temp_data_to_sql(temp_fact_df, 'city_country_table')
-    save_to_sql_file(city_country_inserts, 'zcity_country_table_inserts.sql')
+    save_to_sql_file(city_country_inserts, 'zzcity_country_table_inserts.sql')
 
 if __name__ == '__main__':
     main()
