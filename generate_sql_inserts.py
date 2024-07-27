@@ -123,19 +123,25 @@ def generate_temp_fact_table(temp_csv_filename, city_csv_filename, country_csv_f
     country_df = pd.read_csv(country_csv_filename)
 
     #determine the needed columns for city and country df
-    city_columns = ['city', 'iso3', 'capital', 'population', 'lat', 'lng']
-    country_columns = ['country', 'Region', 'Population in thousands (2017)', 'Population density (per km2, 2017)',
-                       'GDP: Gross domestic product (million current US$)', 'GDP per capita (current US$)', 
-                       'Surface area (km2)', 'Sex ratio (m per 100 f, 2017)']
+    city_columns = ['city', 'country', 'lat', 'lng']
+    country_columns = ['country']
 
     #set each dataframes to only show the needed columns 
     city_df = city_df[city_columns]
     country_df = country_df[country_columns]
 
-    print(city_df.reset_index().rename(columns = {'index':'id'}).head(10))
+    #added an index to the dataframes
+    city_df = city_df.reset_index().rename(columns = {'index':'city_id'})
+    country_df = country_df.reset_index().rename(columns = {'index':'country_id'})
 
-
+    #merge temp_df and city_df first
+    city_temp_merge_df = pd.merge(temp_df,city_df, right_on = ['lat', 'lng','city', 'country'],
+                                  left_on = ['latitude', 'longitude', 'city', 'country'])
     
+    #merge the merged temp_df and city_df with the country_df
+    fact_df = pd.merge(city_temp_merge_df,country_df, right_on = ['country'],
+                                  left_on = ['country'])
+    print(fact_df)
 
 
 
