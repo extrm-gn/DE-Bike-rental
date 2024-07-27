@@ -63,6 +63,9 @@ def country_data_to_sql(csv_filename, table_name):
 def city_data_to_sql(csv_filename, table_name):
     df = pd.read_csv(csv_filename)
 
+    #transform data using the function transform data
+    df = transform_data(df)
+
     #made a list for the column names in the country_profile_variables divided into each data typ
     city_columns_str = ['city', 'iso3', 'capital']
     city_columns_int = 'population'
@@ -97,7 +100,7 @@ def city_data_to_sql(csv_filename, table_name):
 
         # Handle integer values
         city_values_int = value[city_columns_int]
-        city_values_int = int(city_values_int) if not pd.isnull(city_values_int) else 'NULL'
+        city_values_int = int(city_values_int) if not pd.isnull(city_values_int) or city_values_int == 'nan' else 0
         
         # Handle float values with error handling
         city_values_float = [value[col] for col in city_columns_float]
@@ -130,6 +133,13 @@ def safe_float_conversion(value):
     except ValueError:
         return 'NULL'
     
+
+def transform_data(df):
+
+    #drop null values
+    df = df.dropna()
+    
+    return df
 
 def main():
     country_sql_insert_filename = 'zcountry_table_inserts.sql'
