@@ -26,7 +26,6 @@ services:
     container_name: generate_sql_inserts
     volumes: 
       - ./Datasets:/app/Datasets
-      - ~/docker/postgres-init:/app/docker/postgres-init
     depends_on:
       - data_ingestion
     command: python generate_sql_inserts.py
@@ -39,11 +38,8 @@ services:
       POSTGRES_PASSWORD: root
       POSTGRES_DB: bike_db
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - ./bike_data:/var/lib/postgresql/data
       - /app/docker/postgres-init:/docker-entrypoint-initdb.d
     ports:
       - "5432:5432"
-
-volumes:
-  pgdata:
   
