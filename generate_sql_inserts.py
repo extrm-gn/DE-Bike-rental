@@ -1,5 +1,7 @@
 import pandas as pd
 import os
+import psycopg2
+import logging
 
 
 def country_data_to_sql(csv_filename, table_name):
@@ -198,42 +200,49 @@ def transform_data(df):
     
     return df
 
+
+def ingest(db):
+    cursor = db.cursor()
+    logging.info("Cursor created.")
+
+    with db:
+        with open('zcountry_table_inserts.sql', 'r') as f:
+            cursor.execute(f.read())
+        with open('zcity_table_inserts.sql', 'r') as f:
+            cursor.execute(f.read())
+        with open('zzcity_country_table_inserts.sql', 'r') as f:
+            cursor.execute(f.read())
+
+    db.commit()
+
+
 def main():
 
-    # Define the path to the postgres-init directory
-    postgres_init_dir = '/app/docker/postgres-init'
+     #path for local sql inserts
+    country_sql_insert_filename = 'zcountry_table_inserts.sql'
+    city_sql_insert_filename = 'zcity_table_inserts.sql'
 
-    #path for local sql inserts
-    #country_sql_insert_filename = 'zcountry_table_inserts.sql'
-    #city_sql_insert_filename = 'zcity_table_inserts.sql'
-
-    #country_insert_statements = country_data_to_sql('Datasets/country_profile_variables.csv', 'country_table')
-    #city_insert_statements = city_data_to_sql('Datasets/worldcities.csv', 'city_table')
-
-    #save_to_sql_file(country_insert_statements, country_sql_insert_filename)
-    #save_to_sql_file(city_insert_statements, city_sql_insert_filename)
-
-    #temp_fact_df = generate_temp_fact_df('Datasets/city_weather.csv', 'Datasets/worldcities.csv', 'Datasets/country_profile_variables.csv', 
-    #                         'Datasets/city_country_table')
-    #city_country_inserts = temp_data_to_sql(temp_fact_df, 'city_country_table')
-    #save_to_sql_file(city_country_inserts, 'zzcity_country_table_inserts.sql')
-
-    #filename for the sql insert files
-    country_sql_insert_filename = os.path.join(postgres_init_dir, 'zcountry_table_inserts.sql')
-    city_sql_insert_filename = os.path.join(postgres_init_dir, 'zcity_table_inserts.sql')
-    city_country_sql_insert_filename = os.path.join(postgres_init_dir, 'zzcity_country_table_inserts.sql')
-   
-    # Generate SQL insert statements
     country_insert_statements = country_data_to_sql('Datasets/country_profile_variables.csv', 'country_table')
     city_insert_statements = city_data_to_sql('Datasets/worldcities.csv', 'city_table')
-    temp_fact_df = generate_temp_fact_df('Datasets/city_weather.csv', 'Datasets/worldcities.csv', 'Datasets/country_profile_variables.csv', 
-                                         'Datasets/city_country_table')
-    city_country_inserts = temp_data_to_sql(temp_fact_df, 'city_country_table')
-    
-    # Save SQL insert statements to files
+
     save_to_sql_file(country_insert_statements, country_sql_insert_filename)
     save_to_sql_file(city_insert_statements, city_sql_insert_filename)
-    save_to_sql_file(city_country_inserts, city_country_sql_insert_filename)
+
+    temp_fact_df = generate_temp_fact_df('Datasets/city_weather.csv', 'Datasets/worldcities.csv', 'Datasets/country_profile_variables.csv', 
+                             'Datasets/city_country_table')
+    city_country_inserts = temp_data_to_sql(temp_fact_df, 'city_country_table')
+    save_to_sql_file(city_country_inserts, 'zzcity_country_table_inserts.sql')
+
+    print("done with creation of all inserts")
+
+    CONN = psycopg2.connect(**{
+    "host": "localhost",        
+    "user": 'root',
+    "password": 'root',
+    "database": 'bike_db'
+    })
+
+    ingest(CONN)
 
     print("done with creation of all inserts")
 
