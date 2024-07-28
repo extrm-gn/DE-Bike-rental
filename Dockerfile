@@ -9,5 +9,6 @@ COPY Datasets /app/Datasets
 COPY .env /app/
 COPY city_sampler.py /app/
 COPY data_ingestion.py /app/
+COPY generate_sql_inserts.py /app/
 
 CMD ["python", "city_sampler.py"]
