@@ -1,6 +1,6 @@
 FROM python:3.9
 
-RUN pip install pandas requests python-dotenv
+RUN pip install pandas requests python-dotenv psycopg2
 
 WORKDIR /app
 
