@@ -8,7 +8,6 @@ services:
     -  ./Datasets:/app/Datasets
     env_file:
     -  .env 
-    command: python city_sampler.py
   
   data_ingestion:
     build: .
@@ -19,7 +18,6 @@ services:
       - city_sampler
     env_file:
       - .env
-    command: python data_ingestion.py
 
   generate_sql_inserts:
     build: .
@@ -29,7 +27,6 @@ services:
       - ~/docker/postgres-init:/docker-entrypoint-initdb.d
     depends_on:
       - data_ingestion
-    command: python generate_sql_inserts.py
 
   db:
     image: postgres:13
