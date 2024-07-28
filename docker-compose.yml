@@ -38,7 +38,7 @@ services:
       POSTGRES_PASSWORD: root
       POSTGRES_DB: bike_db
     volumes:
-      - ./bike_data:/var/lib/postgresql/data
+      - ./bike_data:/var/lib/postgresql/data:rw
       - /app/docker/postgres-init:/docker-entrypoint-initdb.d
     ports:
       - "5432:5432"
