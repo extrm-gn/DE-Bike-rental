@@ -8,6 +8,7 @@ services:
     -  ./Datasets:/app/Datasets
     env_file:
     -  .env 
+    command: python city_sampler.py
   
   data_ingestion:
     build: .
@@ -18,15 +19,17 @@ services:
       - city_sampler
     env_file:
       - .env
+    command: python data_ingestion.py
 
   generate_sql_inserts:
     build: .
     container_name: generate_sql_inserts
     volumes: 
       - ./Datasets:/app/Datasets
-      - ~/docker/postgres-init:/docker-entrypoint-initdb.d
+      - ~/docker/postgres-init:/app/docker/postgres-init
     depends_on:
       - data_ingestion
+    command: python generate_sql_inserts.py
 
   db:
     image: postgres:13
@@ -37,7 +40,7 @@ services:
       POSTGRES_DB: bike_db
     volumes:
       - pgdata:/var/lib/postgresql/data
-      - ~/docker/postgres-init:/docker-entrypoint-initdb.d
+      - /app/docker/postgres-init:/docker-entrypoint-initdb.d
     ports:
       - "5432:5432"
 

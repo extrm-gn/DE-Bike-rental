@@ -234,7 +234,9 @@ def main():
     save_to_sql_file(country_insert_statements, country_sql_insert_filename)
     save_to_sql_file(city_insert_statements, city_sql_insert_filename)
     save_to_sql_file(city_country_inserts, city_country_sql_insert_filename)
-    
+
+    print("done with creation of all inserts")
+
 
 if __name__ == '__main__':
     main()
