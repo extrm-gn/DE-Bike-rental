@@ -4,38 +4,58 @@ import psycopg2
 import logging
 
 
+def main():
+     #path for local sql inserts
+    country_sql_insert_filename = 'zcountry_table_inserts.sql'
+    city_sql_insert_filename = 'zcity_table_inserts.sql'
+
+    country_insert_statements = country_data_to_sql('Datasets/country_profile_variables.csv', 'country_table')
+    city_insert_statements = city_data_to_sql('Datasets/worldcities.csv', 'city_table')
+
+    save_to_sql_file(country_insert_statements, country_sql_insert_filename)
+    save_to_sql_file(city_insert_statements, city_sql_insert_filename)
+
+    temp_fact_df = generate_temp_fact_df('Datasets/city_weather.csv', 'Datasets/worldcities.csv', 'Datasets/country_profile_variables.csv', 
+                             'Datasets/city_country_table')
+    city_country_inserts = temp_data_to_sql(temp_fact_df, 'city_country_table')
+    save_to_sql_file(city_country_inserts, 'zzcity_country_table_inserts.sql')
+
+    print("connecting to database now....")
+
+    CONN = psycopg2.connect(**{
+    "host": "localhost",        
+    "user": 'root',
+    "password": 'root',
+    "database": 'bike_db'
+    })
+
+    ingest(CONN)
+
+    print("done inserting data")
+
+
 def country_data_to_sql(csv_filename, table_name):
+    """
+    Create the SQL inserts for the country_table
+    """
     df = pd.read_csv(csv_filename)
 
-    #made a list for the column names in the country_profile_variables divided into each data typ
+    #made list of column names according to dtypes to be used in transformation
     country_columns_str = ['country', 'Region']
     country_columns_int = 'Population in thousands (2017)'
     country_columns_float = ['Population density (per km2, 2017)',
                        'GDP: Gross domestic product (million current US$)', 'GDP per capita (current US$)', 
                        'Surface area (km2)', 'Sex ratio (m per 100 f, 2017)']
     
-    #list for the column names in the sql table
-    sql_table_columns = ['country_id', 'country_name', 'country_region', 'country_population', 'country_population_density',
-                         'country_GDP', 'country_GDP_per_capita', 'country_surface_area', 'country_sex_ratio', 
-                         'activation_date', 'expiration_date', 'status']
-    
     sql_table_columns_string = '''country_id, country_name, country_region, country_population, country_population_density,
                          country_GDP, country_GDP_per_capita, country_surface_area, country_sex_ratio, 
                          activation_date, expiration_date, status'''
 
-    #transformed the sql table columns into a string and removed the square brackets
-    sql_table_columns = str(sql_table_columns)
-    sql_table_columns = sql_table_columns.replace('[', '')
-    sql_table_columns = sql_table_columns.replace(']', '')
-
-
-    #id counter for the table primary key
     id_counter = 0
 
     #place holder for the sql commands
     sql_commands = []
 
-    #this loop would iterate each rows
     for index, value in df.iterrows():
 
         #remove the square brackets in the country value list and add seperator
@@ -63,30 +83,19 @@ def country_data_to_sql(csv_filename, table_name):
 
 
 def city_data_to_sql(csv_filename, table_name):
+    """
+    Create SQL Inserts for the city_table
+    """
     df = pd.read_csv(csv_filename)
 
-    #transform data using the function transform data
-    df = transform_data(df)
-
-    #made a list for the column names in the country_profile_variables divided into each data typ
+    #made list of column names according to dtypes to be used in transformation
     city_columns_str = ['city', 'iso3', 'capital']
     city_columns_int = 'population'
     city_columns_float = ['lat', 'lng']
     
-    #list for the column names in the sql table
-    sql_table_columns = ['city_id', 'city_name', 'city_ISO3', 'city_capital', 'city_population', 'city_latitude', 'city_longitude',
-                        'activation_date', 'expiration_date', 'status']
-    
     sql_table_columns_string = '''city_id, city_name, city_ISO3, city_capital, city_population, city_latitude, 
                                   city_longitude, activation_date, expiration_date, status'''
 
-    #transformed the sql table columns into a string and removed the square brackets
-    sql_table_columns = str(sql_table_columns)
-    sql_table_columns = sql_table_columns.replace('[', '')
-    sql_table_columns = sql_table_columns.replace(']', '')
-
-
-    #id counter for the table primary key
     id_counter = 0
 
     #place holder for the sql commands
@@ -120,6 +129,9 @@ def city_data_to_sql(csv_filename, table_name):
 
 
 def generate_temp_fact_df(temp_csv_filename, city_csv_filename, country_csv_filename, table_name):
+    """
+    Generate the fact table dataframe which would be used to insert data to city_country_table
+    """
     temp_df = pd.read_csv(temp_csv_filename)
     city_df = pd.read_csv(city_csv_filename)
     country_df = pd.read_csv(country_csv_filename)
@@ -149,15 +161,13 @@ def generate_temp_fact_df(temp_csv_filename, city_csv_filename, country_csv_file
 
 
 def temp_data_to_sql(df, table_name):
-    
+    """
+    Create the SQL insert command for the city_country_table
+    """
+
     #add a date column
     df['date_gathered'] = pd.to_datetime(df[['Year', 'Month', 'Day']], errors='coerce').dt.strftime('%Y-%m-%d')
 
-
-    #list for the column names in the sql table
-    sql_table_columns = ['city_id', 'country_id', 'mean_temperature', 'date_gathered']
-
-    
     sql_table_columns_string = '''city_id, country_id, mean_temperature, date_gathered'''
 
     #place holder for the sql commands
@@ -184,24 +194,21 @@ def save_to_sql_file(insert_statements, file_path):
             f.write(statement + '\n')
 
 
-#exception handling for float
 def safe_float_conversion(value):
+    """
+    exception handling for float
+    """
     try:
         return f"{float(value):.2f}"
     except ValueError:
         return 'NULL'
-    
-
-def transform_data(df):
-
-    #drop null values
-    df['population'] = df['population'].replace('nan', 'hehe')
-
-    
-    return df
 
 
 def ingest(db):
+    """
+    Connects to database and execute all sql commands to insert data to all table
+    """
+
     cursor = db.cursor()
     logging.info("Cursor created.")
 
@@ -212,10 +219,12 @@ def ingest(db):
         cursor.execute("SELECT count(*) FROM country_table")
         country_table_count = cursor.fetchone()[0]
 
+        #checks if country_table already has data to ensure no repetition in primary key
         if country_table_count == 0:
             with open('zcountry_table_inserts.sql', 'r') as f:
                 cursor.execute(f.read())
         
+        #checks if city_table already has data to ensure no repetition in primary key
         if city_table_count == 0:
             with open('zcity_table_inserts.sql', 'r') as f:
                 cursor.execute(f.read())
@@ -224,37 +233,6 @@ def ingest(db):
             cursor.execute(f.read())
 
     db.commit()
-
-
-def main():
-
-     #path for local sql inserts
-    country_sql_insert_filename = 'zcountry_table_inserts.sql'
-    city_sql_insert_filename = 'zcity_table_inserts.sql'
-
-    country_insert_statements = country_data_to_sql('Datasets/country_profile_variables.csv', 'country_table')
-    city_insert_statements = city_data_to_sql('Datasets/worldcities.csv', 'city_table')
-
-    save_to_sql_file(country_insert_statements, country_sql_insert_filename)
-    save_to_sql_file(city_insert_statements, city_sql_insert_filename)
-
-    temp_fact_df = generate_temp_fact_df('Datasets/city_weather.csv', 'Datasets/worldcities.csv', 'Datasets/country_profile_variables.csv', 
-                             'Datasets/city_country_table')
-    city_country_inserts = temp_data_to_sql(temp_fact_df, 'city_country_table')
-    save_to_sql_file(city_country_inserts, 'zzcity_country_table_inserts.sql')
-
-    print("done with creation of all inserts")
-
-    CONN = psycopg2.connect(**{
-    "host": "localhost",        
-    "user": 'root',
-    "password": 'root',
-    "database": 'bike_db'
-    })
-
-    ingest(CONN)
-
-    print("done with creation of all inserts")
 
 
 if __name__ == '__main__':
