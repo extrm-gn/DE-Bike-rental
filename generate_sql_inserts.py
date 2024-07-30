@@ -23,7 +23,7 @@ def main():
     print("connecting to database now....")
 
     CONN = psycopg2.connect(**{
-    "host": "localhost",        
+    "host": "db",        
     "user": 'root',
     "password": 'root',
     "database": 'bike_db'
