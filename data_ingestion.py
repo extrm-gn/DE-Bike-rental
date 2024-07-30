@@ -67,8 +67,8 @@ def generate_weather_data(year, month, day):
     #check if city_weather.csv is already available
     if os.path.exists('Datasets/city_weather.csv'):
         #put df to csv format in append mode
-        final_weather_df.to_csv('Datasets/city_weather.csv', sep=',', mode='a',
-                            index=False, header=False)
+        final_weather_df.to_csv('Datasets/city_weather.csv', sep=',', mode='w',
+                            index=False, header=True)
     else:
         #put df to csv format if city_weather is not present
         final_weather_df.to_csv('Datasets/city_weather.csv',
