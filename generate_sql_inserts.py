@@ -206,10 +206,20 @@ def ingest(db):
     logging.info("Cursor created.")
 
     with db:
-        with open('zcountry_table_inserts.sql', 'r') as f:
-            cursor.execute(f.read())
-        with open('zcity_table_inserts.sql', 'r') as f:
-            cursor.execute(f.read())
+        cursor.execute("SELECT count(*) FROM city_table")
+        city_table_count = cursor.fetchone()[0]
+
+        cursor.execute("SELECT count(*) FROM country_table")
+        country_table_count = cursor.fetchone()[0]
+
+        if country_table_count == 0:
+            with open('zcountry_table_inserts.sql', 'r') as f:
+                cursor.execute(f.read())
+        
+        if city_table_count == 0:
+            with open('zcity_table_inserts.sql', 'r') as f:
+                cursor.execute(f.read())
+
         with open('zzcity_country_table_inserts.sql', 'r') as f:
             cursor.execute(f.read())
 
