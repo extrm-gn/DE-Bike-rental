@@ -7,6 +7,6 @@ Datasets/selected_city.csv
 
 bike_data/
 
-country_table_inserts.sql
+zcountry_table_inserts.sql
 zcity_table_inserts.sql
 zzcity_country_table_inserts.sql
