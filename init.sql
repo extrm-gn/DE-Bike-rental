@@ -42,9 +42,9 @@ CREATE TABLE date_table (
     season INT,
     yr INT,
     mnth INT,
-    holiday BOOLEAN,
-    weekday INT,
-    workingday BOOLEAN
+    holiday VARCHAR(20),
+    weekday_ INT,
+    workingday VARCHAR(20)
 );
 
 CREATE TABLE bike_rental_table (
