@@ -6,8 +6,8 @@ import logging
 
 def main():
      #path for local sql inserts
-    country_sql_insert_filename = 'zcountry_table_inserts.sql'
-    city_sql_insert_filename = 'zcity_table_inserts.sql'
+    country_sql_insert_filename = '01_country_table_inserts.sql'
+    city_sql_insert_filename = '02_city_table_inserts.sql'
 
     country_insert_statements = country_data_to_sql('Datasets/country_profile_variables.csv', 'country_table')
     city_insert_statements = city_data_to_sql('Datasets/worldcities.csv', 'city_table')
@@ -18,7 +18,7 @@ def main():
     temp_fact_df = generate_temp_fact_df('Datasets/city_weather.csv', 'Datasets/worldcities.csv', 'Datasets/country_profile_variables.csv', 
                              'Datasets/city_country_table')
     city_country_inserts = temp_data_to_sql(temp_fact_df, 'city_country_table')
-    save_to_sql_file(city_country_inserts, 'zzcity_country_table_inserts.sql')
+    save_to_sql_file(city_country_inserts, '03_city_country_table_inserts.sql')
 
     print("connecting to database now....")
 
@@ -221,15 +221,15 @@ def ingest(db):
 
         #checks if country_table already has data to ensure no repetition in primary key
         if country_table_count == 0:
-            with open('zcountry_table_inserts.sql', 'r') as f:
+            with open('01_country_table_inserts.sql', 'r') as f:
                 cursor.execute(f.read())
         
         #checks if city_table already has data to ensure no repetition in primary key
         if city_table_count == 0:
-            with open('zcity_table_inserts.sql', 'r') as f:
+            with open('02_city_table_inserts.sql', 'r') as f:
                 cursor.execute(f.read())
 
-        with open('zzcity_country_table_inserts.sql', 'r') as f:
+        with open('03_city_country_table_inserts.sql', 'r') as f:
             cursor.execute(f.read())
 
     db.commit()
