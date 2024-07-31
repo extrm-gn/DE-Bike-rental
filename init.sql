@@ -35,3 +35,27 @@ CREATE TABLE IF NOT EXISTS city_country_table (
     FOREIGN KEY(country_id) REFERENCES country_table(country_id),
     FOREIGN KEY(city_id) REFERENCES city_table(city_id)
 );
+
+CREATE TABLE date_table (
+    date_id SERIAL PRIMARY KEY,
+    dteday DATE NOT NULL,
+    season INT,
+    yr INT,
+    mnth INT,
+    holiday BOOLEAN,
+    weekday INT,
+    workingday BOOLEAN
+);
+
+CREATE TABLE bike_rental_table (
+    instant SERIAL PRIMARY KEY,
+    date_id INT REFERENCES date_table(date_id),
+    weathersit INT,
+    temp FLOAT,
+    atemp FLOAT,
+    hum FLOAT,
+    windspeed FLOAT,
+    casual INT,
+    registered INT,
+    cnt INT
+);
