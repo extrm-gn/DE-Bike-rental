@@ -20,8 +20,12 @@ def main():
     city_country_inserts = temp_data_to_sql(temp_fact_df, 'city_country_table')
     save_to_sql_file(city_country_inserts, '03_city_country_table_inserts.sql')
 
-    print("connecting to database now....")
+    date_inserts = date_data_to_sql('Datasets/day.csv', 'date_table')
+    save_to_sql_file(date_inserts, '04_date_table_inserts.sql')
 
+    print("connecting to database now....")
+    
+    """
     CONN = psycopg2.connect(**{
     "host": "db",        
     "user": 'root',
@@ -29,7 +33,7 @@ def main():
     "database": 'bike_db'
     })
 
-    ingest(CONN)
+    ingest(CONN)"""
 
     print("done inserting data")
 
@@ -178,6 +182,42 @@ def temp_data_to_sql(df, table_name):
 
         sql_command = f"""INSERT INTO {table_name} ({sql_table_columns_string}) VALUES ({value['city_id']}, 
         {value['country_id']}, {value['AvgTemperature']}, '{value['date_gathered']}');"""
+
+        #add the sql_command for that particular row to the total sql_commands
+        sql_commands.append(sql_command)
+
+    return sql_commands
+
+
+def date_data_to_sql(csv_filename, table_name):
+    df = pd.read_csv(csv_filename)
+
+    df = df[['dteday', 'season', 'yr', 'mnth', 'holiday', 'weekday', 'workingday']]
+
+    date_columns_int = ['season', 'yr', 'mnth', 'weekday']
+    date_columns_bool = ['workingday', 'holiday']
+
+    sql_table_columns_string = 'dteday, season, yr, mnth, weekday, workingday, holiday'
+
+    #place holder for the sql commands
+    sql_commands = []
+
+    #this loop would iterate each rows
+    for index, value in df.iterrows():
+
+        # Handle integer values
+        date_values_int = value[date_columns_int].values
+        #date_values_int = str(int(date_values_int)) if not pd.isnull(date_values_int) else 'NULL'
+        date_values_int = [str(int(value[col])) if not pd.isnull(value[col]) else 'NULL' for col in date_columns_int]
+        date_values_int = ", ".join(date_values_int)
+
+        date_values_bool = [value[col] for col in date_columns_bool]
+        date_values_bool = ["'Yes'" if val == 1 else "'No'" for val in date_values_bool]
+        date_values_bool = ", ".join(date_values_bool)     
+
+        sql_command = f"""INSERT INTO {table_name} ({sql_table_columns_string}) VALUES ( 
+            {value['dteday']} ,{date_values_int}, {date_values_bool});"""
+        
 
         #add the sql_command for that particular row to the total sql_commands
         sql_commands.append(sql_command)
