@@ -25,15 +25,14 @@ def main():
 
     print("connecting to database now....")
     
-    """
     CONN = psycopg2.connect(**{
-    "host": "db",        
+    "host": "localhost",        
     "user": 'root',
     "password": 'root',
     "database": 'bike_db'
     })
 
-    ingest(CONN)"""
+    ingest(CONN)
 
     print("done inserting data")
 
@@ -197,7 +196,7 @@ def date_data_to_sql(csv_filename, table_name):
     date_columns_int = ['season', 'yr', 'mnth', 'weekday']
     date_columns_bool = ['workingday', 'holiday']
 
-    sql_table_columns_string = 'dteday, season, yr, mnth, weekday, workingday, holiday'
+    sql_table_columns_string = 'dteday, season, yr, mnth, weekday_, workingday, holiday'
 
     #place holder for the sql commands
     sql_commands = []
@@ -207,7 +206,6 @@ def date_data_to_sql(csv_filename, table_name):
 
         # Handle integer values
         date_values_int = value[date_columns_int].values
-        #date_values_int = str(int(date_values_int)) if not pd.isnull(date_values_int) else 'NULL'
         date_values_int = [str(int(value[col])) if not pd.isnull(value[col]) else 'NULL' for col in date_columns_int]
         date_values_int = ", ".join(date_values_int)
 
@@ -216,7 +214,7 @@ def date_data_to_sql(csv_filename, table_name):
         date_values_bool = ", ".join(date_values_bool)     
 
         sql_command = f"""INSERT INTO {table_name} ({sql_table_columns_string}) VALUES ( 
-            {value['dteday']} ,{date_values_int}, {date_values_bool});"""
+            '{value['dteday']}' ,{date_values_int}, {date_values_bool});"""
         
 
         #add the sql_command for that particular row to the total sql_commands
@@ -259,6 +257,9 @@ def ingest(db):
         cursor.execute("SELECT count(*) FROM country_table")
         country_table_count = cursor.fetchone()[0]
 
+        cursor.execute("SELECT count(*) FROM date_table")
+        date_table_count = cursor.fetchone()[0]
+
         #checks if country_table already has data to ensure no repetition in primary key
         if country_table_count == 0:
             with open('01_country_table_inserts.sql', 'r') as f:
@@ -271,6 +272,10 @@ def ingest(db):
 
         with open('03_city_country_table_inserts.sql', 'r') as f:
             cursor.execute(f.read())
+        
+        if date_table_count == 0:
+            with open('04_date_table_inserts.sql', 'r') as f:
+                cursor.execute(f.read())
 
     db.commit()
 
