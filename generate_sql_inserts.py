@@ -300,6 +300,9 @@ def ingest(db):
         cursor.execute("SELECT count(*) FROM date_table")
         date_table_count = cursor.fetchone()[0]
 
+        cursor.execute("SELECT count(*) FROM bike_rental_table")
+        bike_rental_table_count = cursor.fetchone()[0]
+
         #checks if country_table already has data to ensure no repetition in primary key
         if country_table_count == 0:
             with open('01_country_table_inserts.sql', 'r') as f:
@@ -317,8 +320,9 @@ def ingest(db):
             with open('04_date_table_inserts.sql', 'r') as f:
                 cursor.execute(f.read())
         
-        with open('05_bike_rental_inserts.sql', 'r') as f:
-            cursor.execute(f.read())
+        if bike_rental_table_count == 0:
+            with open('05_bike_rental_inserts.sql', 'r') as f:
+                cursor.execute(f.read())
 
     db.commit()
 
