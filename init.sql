@@ -37,8 +37,7 @@ CREATE TABLE IF NOT EXISTS city_country_table (
 );
 
 CREATE TABLE date_table (
-    date_id SERIAL PRIMARY KEY,
-    dteday DATE NOT NULL,
+    date_id DATE PRIMARY KEY,
     season INT,
     yr INT,
     mnth INT,
@@ -48,8 +47,8 @@ CREATE TABLE date_table (
 );
 
 CREATE TABLE bike_rental_table (
-    instant SERIAL PRIMARY KEY,
-    date_id INT REFERENCES date_table(date_id),
+    id SERIAL PRIMARY KEY,
+    date_id DATE REFERENCES date_table(date_id),
     weathersit INT,
     temp FLOAT,
     atemp FLOAT,
