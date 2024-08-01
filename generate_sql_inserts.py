@@ -24,7 +24,7 @@ def main():
     save_to_sql_file(date_inserts, '04_date_table_inserts.sql')
 
     print("connecting to database now....")
-    
+    """
     CONN = psycopg2.connect(**{
     "host": "localhost",        
     "user": 'root',
@@ -33,7 +33,7 @@ def main():
     })
 
     ingest(CONN)
-
+    """
     print("done inserting data")
 
 
@@ -219,6 +219,8 @@ def date_data_to_sql(csv_filename, table_name):
 
         #add the sql_command for that particular row to the total sql_commands
         sql_commands.append(sql_command)
+
+    df.to_csv('Datasets/date.csv', index_label='date_id')
 
     return sql_commands
 
