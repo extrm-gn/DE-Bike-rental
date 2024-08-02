@@ -42,9 +42,6 @@ def main():
     date_insert_statements = city_country_data_to_sql(**date_params)
     save_to_sql_file(date_insert_statements, '04_date_table_inserts.sql')
 
-    #bike_inserts = bike_rental_to_sql('hehe', 'bike_rental_table')
-    #save_to_sql_file(bike_inserts, '05_bike_rental_inserts.sql')
-
     bike_insert_statements = city_country_data_to_sql(**bike_params)
     save_to_sql_file(bike_insert_statements, '05_bike_rental_inserts.sql')
 
@@ -158,43 +155,6 @@ def generate_temp_fact_df(temp_csv_filename, city_csv_filename, country_csv_file
 
     return sql_commands
 
-
-def bike_rental_to_sql(csv_filename, table_name):
-    """
-    Create the SQL insert command for the city_country_table
-    """
-
-    df = pd.read_csv('Datasets/day.csv')
-
-    df = df[['dteday', 'weathersit', 'casual', 'registered', 'cnt', 'temp', 'atemp', 'hum', 'windspeed', 'instant']]
-
-    sql_table_columns = ['dteday', 'weathersit', 'casual', 'registered', 'cnt', 'temp', 'atemp', 'hum', 'windspeed']
-    
-    sql_table_columns_string = """date_id, weathersit, casual, registered, cnt, temp, atemp, hum, windspeed"""
-
-    #place holder for the sql commands
-    sql_commands = []
-
-    #this loop would iterate each rows
-    for index, row in df.iterrows():
-        # Directly access each column's value and format for SQL
-        weathersit = f"{row['weathersit']}" if not pd.isnull(row['weathersit']) else 'NULL'
-        casual = str(row['casual']) if not pd.isnull(row['casual']) else 'NULL'
-        registered = str(row['registered']) if not pd.isnull(row['registered']) else 'NULL'
-        cnt = str(row['cnt']) if not pd.isnull(row['cnt']) else 'NULL'
-        temp = str(row['temp']) if not pd.isnull(row['temp']) else 'NULL'
-        atemp = str(row['atemp']) if not pd.isnull(row['atemp']) else 'NULL'
-        hum = str(row['hum']) if not pd.isnull(row['hum']) else 'NULL'
-        windspeed = str(row['windspeed']) if not pd.isnull(row['windspeed']) else 'NULL'
-
-        # Construct the SQL command
-        sql_command = f"""INSERT INTO {table_name} ({sql_table_columns_string}) VALUES ('{row['dteday']}', {weathersit}, {casual}, {registered}, {cnt}, {temp}, {atemp}, {hum}, {windspeed});"""
-    
-        #add the sql_command for that particular row to the total sql_commands
-        sql_commands.append(sql_command)
-    
-    return sql_commands
-    
 
 def save_to_sql_file(insert_statements, file_path):
     """
