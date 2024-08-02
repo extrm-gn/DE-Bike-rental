@@ -9,8 +9,24 @@ def main():
     country_sql_insert_filename = '01_country_table_inserts.sql'
     city_sql_insert_filename = '02_city_table_inserts.sql'
 
-    country_insert_statements = country_data_to_sql('Datasets/country_profile_variables.csv', 'country_table')
-    city_insert_statements = city_data_to_sql('Datasets/worldcities.csv', 'city_table')
+    #country_insert_statements = country_data_to_sql('Datasets/country_profile_variables.csv', 'country_table')
+    #city_insert_statements = city_data_to_sql('Datasets/worldcities.csv', 'city_table')
+
+    country_params = {'csv_filename': 'Datasets/country_profile_variables.csv', 'table_name': 'country_table',
+                      'int_columns': 'Population in thousands (2017)', 'str_columns': ['country', 'Region'],
+                      'float_columns': ['Population density (per km2, 2017)','GDP: Gross domestic product (million current US$)', 
+                                        'GDP per capita (current US$)', 'Surface area (km2)', 'Sex ratio (m per 100 f, 2017)'],
+                      'str_table_columns': '''country_id, country_name, country_region, country_population, country_population_density,
+                        country_GDP, country_GDP_per_capita, country_surface_area, country_sex_ratio, activation_date,
+                        expiration_date, status'''}
+    
+    city_params = {'csv_filename': 'Datasets/worldcities.csv', 'table_name': 'city_table', 'int_columns': 'population', 
+                   'str_columns':['city', 'iso3', 'capital'], 'float_columns': ['lat', 'lng'], 
+                   'str_table_columns': '''city_id, city_name, city_ISO3, city_capital, city_population, city_latitude, 
+                                  city_longitude, activation_date, expiration_date, status'''}
+
+    country_insert_statements = city_country_data_to_sql(**country_params)
+    city_insert_statements = city_country_data_to_sql(**city_params)
 
     save_to_sql_file(country_insert_statements, country_sql_insert_filename)
     save_to_sql_file(city_insert_statements, city_sql_insert_filename)
@@ -26,7 +42,7 @@ def main():
     bike_inserts = bike_rental_to_sql('hehe', 'bike_rental_table')
     save_to_sql_file(bike_inserts, '05_bike_rental_inserts.sql')
     print("connecting to database now....")
-    
+    """
     CONN = psycopg2.connect(**{
     "host": "localhost",        
     "user": 'root',
@@ -35,8 +51,38 @@ def main():
     })
 
     ingest(CONN)
-    
+    """
     print("done inserting data")
+
+
+def city_country_data_to_sql(csv_filename, table_name, int_columns, str_columns, float_columns,
+                             str_table_columns):
+    df = pd.read_csv(csv_filename)
+
+    id_counter = 0
+
+    sql_commands = []
+
+    for index, value in df.iterrows():
+        values_str = value[str_columns].values
+        values_str = [str(val).replace("'", "''").strip() for val in values_str]
+        values_str = "', '".join(values_str)
+
+        values_int = value[int_columns]
+        values_int = int(values_int) if not pd.isnull(values_int) else 'NULL'
+
+        values_float = [value[col] for col in float_columns]
+        values_float = [safe_float_conversion(val) for val in values_float]
+        values_float = ", ".join(values_float)
+
+        sql_command = f"""INSERT INTO {table_name} ({str_table_columns}) VALUES ({id_counter}, 
+              '{values_str}', {values_int}, {values_float}, '01/01/2017', '01/01/9999', 'ACTIVE');"""
+        id_counter += 1
+
+        #add the sql_command for that particular row to the total sql_commands
+        sql_commands.append(sql_command)
+
+    return sql_commands
 
 
 def country_data_to_sql(csv_filename, table_name):
