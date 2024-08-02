@@ -29,20 +29,20 @@ def main():
                    'int_columns': ['weathersit', 'casual', 'registered', 'cnt'], 'float_columns' : ['temp', 'atemp', 'hum', 'windspeed'],
                    'str_table_columns': "date_id, weathersit, casual, registered, cnt, temp, atemp, hum, windspeed"}
     
-    country_insert_statements = city_country_data_to_sql(**country_params)
-    city_insert_statements = city_country_data_to_sql(**city_params)
+    country_insert_statements = generate_sql_statements(**country_params)
+    city_insert_statements = generate_sql_statements(**city_params)
 
     save_to_sql_file(country_insert_statements, country_sql_insert_filename)
     save_to_sql_file(city_insert_statements, city_sql_insert_filename)
 
-    city_country_inserts = generate_temp_fact_df('Datasets/city_weather.csv', 'Datasets/worldcities.csv', 'Datasets/country_profile_variables.csv', 
+    city_country_inserts = generate_city_country_statements('Datasets/city_weather.csv', 'Datasets/worldcities.csv', 'Datasets/country_profile_variables.csv', 
                              'city_country_table')
     save_to_sql_file(city_country_inserts, '03_city_country_table_inserts.sql')
 
-    date_insert_statements = city_country_data_to_sql(**date_params)
+    date_insert_statements = generate_sql_statements(**date_params)
     save_to_sql_file(date_insert_statements, '04_date_table_inserts.sql')
 
-    bike_insert_statements = city_country_data_to_sql(**bike_params)
+    bike_insert_statements = generate_sql_statements(**bike_params)
     save_to_sql_file(bike_insert_statements, '05_bike_rental_inserts.sql')
 
     print("connecting to database now....")
@@ -59,7 +59,7 @@ def main():
     print("done inserting data")
 
 
-def city_country_data_to_sql(csv_filename, table_name, int_columns,
+def generate_sql_statements(csv_filename, table_name, int_columns,
                              str_table_columns, bool_columns = [], str_columns = [], float_columns = []):
     df = pd.read_csv(csv_filename)
 
@@ -107,7 +107,7 @@ def city_country_data_to_sql(csv_filename, table_name, int_columns,
     return sql_commands
 
 
-def generate_temp_fact_df(temp_csv_filename, city_csv_filename, country_csv_filename, table_name):
+def generate_city_country_statements(temp_csv_filename, city_csv_filename, country_csv_filename, table_name):
     """
     Generate the fact table dataframe and insert commands to insert data to city_country_table
     """
