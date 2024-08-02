@@ -25,6 +25,10 @@ def main():
     date_params = {'csv_filename': 'Datasets/day.csv', 'table_name': 'date_table', 'int_columns': ['season', 'yr', 'mnth', 'weekday'],
                    'str_table_columns': 'date_id, season, yr, mnth, weekday_, workingday, holiday', 'bool_columns': ['workingday', 'holiday']}
     
+    bike_params = {'csv_filename': 'Datasets/day.csv', 'table_name': 'bike_rental_table', 
+                   'int_columns': ['weathersit', 'casual', 'registered', 'cnt'], 'float_columns' : ['temp', 'atemp', 'hum', 'windspeed'],
+                   'str_table_columns': "date_id, weathersit, casual, registered, cnt, temp, atemp, hum, windspeed"}
+    
     country_insert_statements = city_country_data_to_sql(**country_params)
     city_insert_statements = city_country_data_to_sql(**city_params)
 
@@ -38,10 +42,14 @@ def main():
     date_insert_statements = city_country_data_to_sql(**date_params)
     save_to_sql_file(date_insert_statements, '04_date_table_inserts.sql')
 
-    bike_inserts = bike_rental_to_sql('hehe', 'bike_rental_table')
-    save_to_sql_file(bike_inserts, '05_bike_rental_inserts.sql')
+    #bike_inserts = bike_rental_to_sql('hehe', 'bike_rental_table')
+    #save_to_sql_file(bike_inserts, '05_bike_rental_inserts.sql')
+
+    bike_insert_statements = city_country_data_to_sql(**bike_params)
+    save_to_sql_file(bike_insert_statements, '05_bike_rental_inserts.sql')
+
     print("connecting to database now....")
-    """
+    
     CONN = psycopg2.connect(**{
     "host": "localhost",        
     "user": 'root',
@@ -50,7 +58,7 @@ def main():
     })
 
     ingest(CONN)
-    """
+    
     print("done inserting data")
 
 
@@ -74,7 +82,14 @@ def city_country_data_to_sql(csv_filename, table_name, int_columns,
 
             sql_command = f"""INSERT INTO {table_name} ({str_table_columns}) VALUES ( 
                 '{value['dteday']}' ,{values_int}, {values_bool});"""
-            
+        elif table_name == 'bike_rental_table':
+            values_float = [value[col] for col in float_columns]
+            values_float = [safe_float_conversion(val) for val in values_float]
+            values_float = ", ".join(values_float)
+
+            sql_command = f"""INSERT INTO {table_name} ({str_table_columns}) VALUES ( 
+                '{value['dteday']}' ,{values_int}, {values_float});"""
+
         else:
             values_float = [value[col] for col in float_columns]
             values_float = [safe_float_conversion(val) for val in values_float]
@@ -97,7 +112,7 @@ def city_country_data_to_sql(csv_filename, table_name, int_columns,
 
 def generate_temp_fact_df(temp_csv_filename, city_csv_filename, country_csv_filename, table_name):
     """
-    Generate the fact table dataframe which would be used to insert data to city_country_table
+    Generate the fact table dataframe and insert commands to insert data to city_country_table
     """
     temp_df = pd.read_csv(temp_csv_filename)
     city_df = pd.read_csv(city_csv_filename)
