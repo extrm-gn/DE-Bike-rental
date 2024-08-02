@@ -31,9 +31,8 @@ def main():
     save_to_sql_file(country_insert_statements, country_sql_insert_filename)
     save_to_sql_file(city_insert_statements, city_sql_insert_filename)
 
-    temp_fact_df = generate_temp_fact_df('Datasets/city_weather.csv', 'Datasets/worldcities.csv', 'Datasets/country_profile_variables.csv', 
-                             'Datasets/city_country_table')
-    city_country_inserts = temp_data_to_sql(temp_fact_df, 'city_country_table')
+    city_country_inserts = generate_temp_fact_df('Datasets/city_weather.csv', 'Datasets/worldcities.csv', 'Datasets/country_profile_variables.csv', 
+                             'city_country_table')
     save_to_sql_file(city_country_inserts, '03_city_country_table_inserts.sql')
 
     date_insert_statements = city_country_data_to_sql(**date_params)
@@ -42,7 +41,7 @@ def main():
     bike_inserts = bike_rental_to_sql('hehe', 'bike_rental_table')
     save_to_sql_file(bike_inserts, '05_bike_rental_inserts.sql')
     print("connecting to database now....")
-    
+    """
     CONN = psycopg2.connect(**{
     "host": "localhost",        
     "user": 'root',
@@ -51,7 +50,7 @@ def main():
     })
 
     ingest(CONN)
-    
+    """
     print("done inserting data")
 
 
@@ -125,16 +124,8 @@ def generate_temp_fact_df(temp_csv_filename, city_csv_filename, country_csv_file
                                   left_on = ['country'])
     fact_df = fact_df[['city_id', 'country_id', 'Day','Month', 'Year', 'AvgTemperature']]
 
-    return fact_df
-
-
-def temp_data_to_sql(df, table_name):
-    """
-    Create the SQL insert command for the city_country_table
-    """
-
     #add a date column
-    df['date_gathered'] = pd.to_datetime(df[['Year', 'Month', 'Day']], errors='coerce').dt.strftime('%Y-%m-%d')
+    fact_df['date_gathered'] = pd.to_datetime(fact_df[['Year', 'Month', 'Day']], errors='coerce').dt.strftime('%Y-%m-%d')
 
     sql_table_columns_string = '''city_id, country_id, mean_temperature, date_gathered'''
 
@@ -142,7 +133,7 @@ def temp_data_to_sql(df, table_name):
     sql_commands = []
 
     #this loop would iterate each rows
-    for index, value in df.iterrows():
+    for index, value in fact_df.iterrows():
 
         sql_command = f"""INSERT INTO {table_name} ({sql_table_columns_string}) VALUES ({value['city_id']}, 
         {value['country_id']}, {value['AvgTemperature']}, '{value['date_gathered']}');"""
