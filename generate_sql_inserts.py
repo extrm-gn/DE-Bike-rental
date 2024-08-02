@@ -153,42 +153,6 @@ def temp_data_to_sql(df, table_name):
     return sql_commands
 
 
-def date_data_to_sql(csv_filename, table_name):
-    df = pd.read_csv(csv_filename)
-
-    df = df[['dteday', 'season', 'yr', 'mnth', 'holiday', 'weekday', 'workingday']]
-
-    date_columns_int = ['season', 'yr', 'mnth', 'weekday']
-    date_columns_bool = ['workingday', 'holiday']
-
-    sql_table_columns_string = 'date_id, season, yr, mnth, weekday_, workingday, holiday'
-
-    #place holder for the sql commands
-    sql_commands = []
-
-    #this loop would iterate each rows
-    for index, value in df.iterrows():
-
-        # Handle integer values
-        date_values_int = value[date_columns_int].values
-        date_values_int = [str(int(value[col])) if not pd.isnull(value[col]) else 'NULL' for col in date_columns_int]
-        date_values_int = ", ".join(date_values_int)
-
-        date_values_bool = [value[col] for col in date_columns_bool]
-        date_values_bool = ["'Yes'" if val == 1 else "'No'" for val in date_values_bool]
-        date_values_bool = ", ".join(date_values_bool)     
-
-        sql_command = f"""INSERT INTO {table_name} ({sql_table_columns_string}) VALUES ( 
-            '{value['dteday']}' ,{date_values_int}, {date_values_bool});"""
-        
-
-        #add the sql_command for that particular row to the total sql_commands
-        sql_commands.append(sql_command)
-
-    df.to_csv('Datasets/date.csv', index_label='date_id')
-
-    return sql_commands
-
 def bike_rental_to_sql(csv_filename, table_name):
     """
     Create the SQL insert command for the city_country_table
