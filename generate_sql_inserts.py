@@ -5,57 +5,7 @@ import logging
 
 
 def main():
-     #path for local sql inserts
-    country_sql_insert_filename = '01_country_table_inserts.sql'
-    city_sql_insert_filename = '02_city_table_inserts.sql'
 
-    country_params = {'csv_filename': 'Datasets/country_profile_variables.csv', 'table_name': 'country_table',
-                      'int_columns': ['Population in thousands (2017)'], 'str_columns': ['country', 'Region'],
-                      'float_columns': ['Population density (per km2, 2017)','GDP: Gross domestic product (million current US$)', 
-                                        'GDP per capita (current US$)', 'Surface area (km2)', 'Sex ratio (m per 100 f, 2017)'],
-                      'str_table_columns': '''country_id, country_name, country_region, country_population, country_population_density,
-                        country_GDP, country_GDP_per_capita, country_surface_area, country_sex_ratio, activation_date,
-                        expiration_date, status'''}
-    
-    city_params = {'csv_filename': 'Datasets/worldcities.csv', 'table_name': 'city_table', 'int_columns': ['population'], 
-                   'str_columns':['city', 'iso3', 'capital'], 'float_columns': ['lat', 'lng'], 
-                   'str_table_columns': '''city_id, city_name, city_ISO3, city_capital, city_population, city_latitude, 
-                                  city_longitude, activation_date, expiration_date, status'''}
-
-    date_params = {'csv_filename': 'Datasets/day.csv', 'table_name': 'date_table', 'int_columns': ['season', 'yr', 'mnth', 'weekday'],
-                   'str_table_columns': 'date_id, season, yr, mnth, weekday_, workingday, holiday', 'bool_columns': ['workingday', 'holiday']}
-    
-    bike_params = {'csv_filename': 'Datasets/day.csv', 'table_name': 'bike_rental_table', 
-                   'int_columns': ['weathersit', 'casual', 'registered', 'cnt'], 'float_columns' : ['temp', 'atemp', 'hum', 'windspeed'],
-                   'str_table_columns': "date_id, weathersit, casual, registered, cnt, temp, atemp, hum, windspeed"}
-    """
-    country_insert_statements = generate_sql_statements(**country_params)
-    city_insert_statements = generate_sql_statements(**city_params)
-
-    save_to_sql_file(country_insert_statements, country_sql_insert_filename)
-    save_to_sql_file(city_insert_statements, city_sql_insert_filename)
-
-    city_country_inserts = generate_city_country_statements('Datasets/city_weather.csv', 'Datasets/worldcities.csv', 'Datasets/country_profile_variables.csv', 
-                             'city_country_table')
-    save_to_sql_file(city_country_inserts, '03_city_country_table_inserts.sql')
-
-    date_insert_statements = generate_sql_statements(**date_params)
-    save_to_sql_file(date_insert_statements, '04_date_table_inserts.sql')
-
-    bike_insert_statements = generate_sql_statements(**bike_params)
-    save_to_sql_file(bike_insert_statements, '05_bike_rental_inserts.sql')
-
-    print("connecting to database now....")
-    
-    CONN = psycopg2.connect(**{
-    "host": "localhost",        
-    "user": 'root',
-    "password": 'root',
-    "database": 'bike_db'
-    })
-
-    ingest(CONN)
-    """
     save_sql_statements_to_file(
     generate_country_sql_statements(),
     generate_city_sql_statements(),
