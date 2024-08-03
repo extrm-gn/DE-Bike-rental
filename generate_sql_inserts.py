@@ -243,6 +243,18 @@ def ingest_data(save_sql_statements_to_file):
     )
     ingest(CONN)
 
+@repository
+def my_repository():
+    return [
+        generate_country_sql_statements,
+        generate_city_sql_statements,
+        generate_city_country_statements_asset,
+        generate_date_sql_statements,
+        generate_bike_sql_statements,
+        save_sql_statements_to_file,
+        ingest_data
+    ]
+
 
 if __name__ == '__main__':
     main()
