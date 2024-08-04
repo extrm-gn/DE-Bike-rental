@@ -178,7 +178,7 @@ def ingest(db):
 
 
 @asset
-def generate_country_sql_statements():
+def generate_country_sql_statements(context, generate_weather_data):
     country_params = {
         'csv_filename': 'Datasets/country_profile_variables.csv', 'table_name': 'country_table',
         'int_columns': ['Population in thousands (2017)'], 'str_columns': ['country', 'Region'],
@@ -191,7 +191,7 @@ def generate_country_sql_statements():
     return generate_sql_statements(**country_params)
 
 @asset
-def generate_city_sql_statements():
+def generate_city_sql_statements(context, generate_weather_data):
     city_params = {
         'csv_filename': 'Datasets/worldcities.csv', 'table_name': 'city_table',
         'int_columns': ['population'], 'str_columns':['city', 'iso3', 'capital'],
@@ -202,12 +202,12 @@ def generate_city_sql_statements():
     return generate_sql_statements(**city_params)
 
 @asset
-def generate_city_country_statements_asset():
+def generate_city_country_statements_asset(context, generate_country_sql_statements, generate_city_sql_statements):
     return generate_city_country_statements('Datasets/city_weather.csv', 'Datasets/worldcities.csv', 'Datasets/country_profile_variables.csv', 
                                              'city_country_table')
 
 @asset
-def generate_date_sql_statements():
+def generate_date_sql_statements(context, generate_city_country_statements_asset):
     date_params = {
         'csv_filename': 'Datasets/day.csv', 'table_name': 'date_table',
         'int_columns': ['season', 'yr', 'mnth', 'weekday'],
@@ -217,7 +217,7 @@ def generate_date_sql_statements():
     return generate_sql_statements(**date_params)
 
 @asset
-def generate_bike_sql_statements():
+def generate_bike_sql_statements(context,generate_date_sql_statements):
     bike_params = {
         'csv_filename': 'Datasets/day.csv', 'table_name': 'bike_rental_table',
         'int_columns': ['weathersit', 'casual', 'registered', 'cnt'], 'float_columns' : ['temp', 'atemp', 'hum', 'windspeed'],
@@ -234,7 +234,10 @@ def save_sql_statements_to_file(generate_country_sql_statements, generate_city_s
     save_to_sql_file(generate_bike_sql_statements, '05_bike_rental_inserts.sql')
 
 @asset
-def ingest_data(save_sql_statements_to_file):
+def ingest_data(context, save_sql_statements_to_file):
+    
+    context.log.info("ingesting data to database")
+    
     CONN = psycopg2.connect(
         host="localhost",
         user='root',
