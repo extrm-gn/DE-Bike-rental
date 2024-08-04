@@ -188,7 +188,11 @@ def generate_country_sql_statements(context, generate_weather_data):
         country_GDP, country_GDP_per_capita, country_surface_area, country_sex_ratio, activation_date,
         expiration_date, status'''
     }
-    return generate_sql_statements(**country_params)
+    
+    save_to_sql_file(generate_sql_statements(**country_params), 
+                     '01_country_table_inserts.sql')
+
+    #return generate_sql_statements(**country_params)
 
 @asset
 def generate_city_sql_statements(context, generate_weather_data):
@@ -199,7 +203,10 @@ def generate_city_sql_statements(context, generate_weather_data):
         'str_table_columns': '''city_id, city_name, city_ISO3, city_capital, city_population, city_latitude, 
         city_longitude, activation_date, expiration_date, status'''
     }
-    return generate_sql_statements(**city_params)
+    save_to_sql_file(generate_sql_statements(**city_params), 
+                     '02_city_table_inserts.sql')
+
+    #return generate_sql_statements(**city_params)
 
 @asset
 def generate_city_country_statements_asset(context, generate_country_sql_statements, generate_city_sql_statements):
@@ -226,9 +233,7 @@ def generate_bike_sql_statements(context,generate_date_sql_statements):
     return generate_sql_statements(**bike_params)
 
 @asset
-def save_sql_statements_to_file(generate_country_sql_statements, generate_city_sql_statements, generate_city_country_statements_asset, generate_date_sql_statements, generate_bike_sql_statements):
-    save_to_sql_file(generate_country_sql_statements, '01_country_table_inserts.sql')
-    save_to_sql_file(generate_city_sql_statements, '02_city_table_inserts.sql')
+def save_sql_statements_to_file(generate_city_country_statements_asset, generate_date_sql_statements, generate_bike_sql_statements):
     save_to_sql_file(generate_city_country_statements_asset, '03_city_country_table_inserts.sql')
     save_to_sql_file(generate_date_sql_statements, '04_date_table_inserts.sql')
     save_to_sql_file(generate_bike_sql_statements, '05_bike_rental_inserts.sql')
