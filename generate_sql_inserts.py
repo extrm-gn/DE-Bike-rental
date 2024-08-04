@@ -6,13 +6,6 @@ import logging
 
 def main():
 
-    save_sql_statements_to_file(
-    generate_country_sql_statements(),
-    generate_city_sql_statements(),
-    generate_city_country_statements_asset(),
-    generate_date_sql_statements(),
-    generate_bike_sql_statements()
-)
     print("done inserting data")
 
 
@@ -210,8 +203,10 @@ def generate_city_sql_statements(context, generate_weather_data):
 
 @asset
 def generate_city_country_statements_asset(context, generate_country_sql_statements, generate_city_sql_statements):
-    return generate_city_country_statements('Datasets/city_weather.csv', 'Datasets/worldcities.csv', 'Datasets/country_profile_variables.csv', 
-                                             'city_country_table')
+    city_country_statements = generate_city_country_statements('Datasets/city_weather.csv', 'Datasets/worldcities.csv', 
+                                                               'Datasets/country_profile_variables.csv', 'city_country_table')
+    save_to_sql_file(city_country_statements, '03_city_country_table_inserts.sql')
+
 
 @asset
 def generate_date_sql_statements(context, generate_city_country_statements_asset):
@@ -221,7 +216,8 @@ def generate_date_sql_statements(context, generate_city_country_statements_asset
         'str_table_columns': 'date_id, season, yr, mnth, weekday_, workingday, holiday',
         'bool_columns': ['workingday', 'holiday']
     }
-    return generate_sql_statements(**date_params)
+    save_to_sql_file(generate_sql_statements(**date_params), '04_date_table_inserts.sql')
+
 
 @asset
 def generate_bike_sql_statements(context,generate_date_sql_statements):
@@ -230,13 +226,8 @@ def generate_bike_sql_statements(context,generate_date_sql_statements):
         'int_columns': ['weathersit', 'casual', 'registered', 'cnt'], 'float_columns' : ['temp', 'atemp', 'hum', 'windspeed'],
         'str_table_columns': "date_id, weathersit, casual, registered, cnt, temp, atemp, hum, windspeed"
     }
-    return generate_sql_statements(**bike_params)
 
-@asset
-def save_sql_statements_to_file(generate_city_country_statements_asset, generate_date_sql_statements, generate_bike_sql_statements):
-    save_to_sql_file(generate_city_country_statements_asset, '03_city_country_table_inserts.sql')
-    save_to_sql_file(generate_date_sql_statements, '04_date_table_inserts.sql')
-    save_to_sql_file(generate_bike_sql_statements, '05_bike_rental_inserts.sql')
+    save_to_sql_file(generate_sql_statements(**bike_params), '05_bike_rental_inserts.sql')
 
 @asset
 def ingest_data(context, save_sql_statements_to_file):
