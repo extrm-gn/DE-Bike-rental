@@ -230,7 +230,7 @@ def generate_bike_sql_statements(context,generate_date_sql_statements):
     save_to_sql_file(generate_sql_statements(**bike_params), '05_bike_rental_inserts.sql')
 
 @asset
-def ingest_data(context, save_sql_statements_to_file):
+def ingest_data(context, generate_bike_sql_statements):
     
     context.log.info("ingesting data to database")
 
