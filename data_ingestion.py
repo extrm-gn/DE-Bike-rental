@@ -1,16 +1,28 @@
 import requests
 import pandas as pd
 import statistics
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 from dotenv import load_dotenv
+from dagster import asset
 
 
 def main():
-    final_weather_df = generate_weather_data(2023, 10, 6)
+    #generate_weather_data()
+    print("Inside data_ingestion.py")
+    
+@asset
+def generate_weather_data(context, select_cities_to_csv):
+    context.log.info("generating weather data.")
 
+    #get the day today and subract 2 days from it since api doesn't update as quickly
+    today = datetime.today()
+    day_before_yesterday = today - timedelta(days = 2)
 
-def generate_weather_data(year, month, day):
+    year = day_before_yesterday.year
+    month = day_before_yesterday.month
+    day = day_before_yesterday.day
+
     #loads variables in the env
     load_dotenv()
 
@@ -61,6 +73,7 @@ def generate_weather_data(year, month, day):
     final_weather_df.to_csv('Datasets/city_weather.csv', sep=',', mode='w',
                             index=False, header=True)
 
+    print(final_weather_df.head())
     print("Data ingestion done")
 
     return final_weather_df
