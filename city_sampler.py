@@ -2,20 +2,24 @@ import pandas as pd
 import random
 import os
 from dotenv import load_dotenv
+from dagster import asset
 
 
 def main():
+    select_cities_to_csv()
+
+@asset
+def select_cities_to_csv(context):
+    """
+    Select at least 2 cities per country.
+    """
+
+    context.log.info("city_sampler executing.")
+
     #load environment variables
     load_dotenv()
 
     filepath = os.getenv('WORLD_CITIES_FILE')
-    select_cities_to_csv(f"{filepath}")
-
-
-def select_cities_to_csv(filepath):
-    """
-    Select at least 2 cities per country.
-    """
 
     df = pd.read_csv(filepath)
 
@@ -63,6 +67,7 @@ def select_cities_to_csv(filepath):
     selected_city_df.to_csv('Datasets/selected_city.csv', mode='w', index=False)
 
     print("Done with sampling city.")
+    context.log.info("city_sampler executed.")
 
 
 if __name__ == "__main__":
