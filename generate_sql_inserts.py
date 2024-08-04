@@ -1,5 +1,5 @@
 import pandas as pd
-from dagster import asset, repository
+from dagster import asset
 import psycopg2
 import logging
 
@@ -237,7 +237,7 @@ def save_sql_statements_to_file(generate_country_sql_statements, generate_city_s
 def ingest_data(context, save_sql_statements_to_file):
     
     context.log.info("ingesting data to database")
-    
+
     CONN = psycopg2.connect(
         host="localhost",
         user='root',
@@ -245,18 +245,6 @@ def ingest_data(context, save_sql_statements_to_file):
         database='bike_db'
     )
     ingest(CONN)
-
-@repository
-def my_repository():
-    return [
-        generate_country_sql_statements,
-        generate_city_sql_statements,
-        generate_city_country_statements_asset,
-        generate_date_sql_statements,
-        generate_bike_sql_statements,
-        save_sql_statements_to_file,
-        ingest_data
-    ]
 
 
 if __name__ == '__main__':
