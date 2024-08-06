@@ -4,21 +4,38 @@ from generate_sql_inserts import generate_country_sql_statements, generate_city_
 from generate_sql_inserts import generate_city_country_statements_asset, generate_date_sql_statements
 from generate_sql_inserts import generate_bike_sql_statements, ingest_data
 from dagster import repository
+from dagster import (
+    AssetSelection,
+    Definitions,
+    ScheduleDefinition,
+    define_asset_job,
 
-#my_assets = AssetGroup([select_cities_to_csv, generate_weather_data, generate_country_sql_statements, 
-#                        generate_city_sql_statements, generate_city_country_statements_asset, 
-#                        generate_date_sql_statements, generate_bike_sql_statements, save_sql_statements_to_file, 
-#                        ingest_data])
+)
+
+all_assets = [
+    select_cities_to_csv,
+    generate_weather_data,
+    generate_country_sql_statements,
+    generate_city_sql_statements,
+    generate_city_country_statements_asset,
+    generate_date_sql_statements,
+    generate_bike_sql_statements,
+    ingest_data
+]
+
+#initialize dagster job
+data_ingestion_job = define_asset_job("data_ingestion_job", selection=AssetSelection.all())
+
+#initialize dagster schedule that runs the job every minute (for testing purposes)
+ingestion_schedule = ScheduleDefinition(
+    job=data_ingestion_job,
+    cron_schedule="* * * * *",  # every minute
+)
 
 @repository
 def my_repository():
     return [
-        select_cities_to_csv,
-        generate_weather_data,
-        generate_country_sql_statements,
-        generate_city_sql_statements,
-        generate_city_country_statements_asset,
-        generate_date_sql_statements,
-        generate_bike_sql_statements,
-        ingest_data
+        data_ingestion_job,
+        ingestion_schedule,
+        *all_assets
     ]
