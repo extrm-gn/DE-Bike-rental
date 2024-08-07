@@ -1,0 +1,15 @@
+storage:
+  filesystem:
+    base_dir: /dagster/storage
+
+run_storage:
+  filesystem:
+    base_dir: /dagster/run_storage
+
+schedule_storage:
+  filesystem:
+    base_dir: /dagster/schedule_storage
+
+event_log_storage:
+  filesystem:
+    base_dir: /dagster/event_log_storage
