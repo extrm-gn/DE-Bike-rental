@@ -53,6 +53,18 @@ services:
       start_period: 30s
       timeout: 5s
       
+  dagster:
+    image: dagster/dagster:latest
+    ports:
+      - "3000:3000"  
+      - "4000:4000"  
+    volumes:
+      - .:/app 
+      - ./Datasets:/app/Datasets
+    depends_on:
+      - db
+    command: dagster dev
+
 volumes:
   bike_data:
     name: bike_data
