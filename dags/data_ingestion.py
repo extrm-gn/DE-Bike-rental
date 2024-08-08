@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 import os
 from dotenv import load_dotenv
 from dagster import asset
+from concurrent.futures import ThreadPoolExecutor
 
 
 def main():
@@ -43,27 +44,32 @@ def generate_weather_data(context, select_cities_to_csv):
     #placeholder for the temperature that would be appended to the location_df once loop is done
     temp_list = []
 
-    for i in range(len(location_df)):
+    # Use a session for efficient HTTP connections
+    with requests.Session() as session:
+        session.params = {"start_date": date_weather, "end_date": date_weather, "hourly": "temperature_2m"}
 
-        #initialized lat and long of the city
-        lat = location_df['latitude'][i]
-        long = location_df['longitude'][i]
+        def fetch_temperature(lat, long):
+            parameters = {"longitude": long, "latitude": lat}
+            response = session.get(url=API, params=parameters)
+            data = response.json()
 
-        parameters = {"longitude":long,"latitude":lat,"start_date":date_weather,
-                    "end_date":date_weather,"hourly":"temperature_2m"}
+            # Calculate mean temperature and format date
+            mean_temp_fahr = round((statistics.mean(data['hourly']['temperature_2m']) * 9/5) + 32, 1)
+            time_str = data['hourly']['time'][0]
+            time_dt = datetime.strptime(time_str, '%Y-%m-%dT%H:%M')
 
-        #initializing the request module that makes accessing API available
-        response = requests.get(url=API, params=parameters)
-        data = response.json()  
+            return {
+                'AvgTemperature': mean_temp_fahr,
+                'Month': time_dt.month,
+                'Day': time_dt.day,
+                'Year': time_dt.year,
+                'latitude': lat,
+                'longitude': long
+            }
 
-        #get the mean_temp of city rounded to first decimal place and get date string, formatted according to datetime module
-        mean_temp_fahr = round((statistics.mean(data['hourly']['temperature_2m']) * 9/5) + 32, 1)
-        time_str = data['hourly']['time'][0]
-        time_dt = datetime.strptime(time_str, '%Y-%m-%dT%H:%M')
-        
-        temp_list.append({'AvgTemperature':mean_temp_fahr, 'Month':time_dt.month,
-                          'Day':time_dt.day, 'Year':time_dt.year, 'latitude':lat,
-                          'longitude':long})
+        # Use ThreadPoolExecutor to parallelize API requests
+        with ThreadPoolExecutor() as executor:
+            temp_list = list(executor.map(lambda row: fetch_temperature(row['latitude'], row['longitude']), location_df.to_dict('records')))
 
     #make the list placeholder as a dataframe and merge it with citylocation_df
     temp_df = pd.DataFrame(temp_list)
