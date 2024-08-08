@@ -235,7 +235,7 @@ def ingest_data(context, generate_bike_sql_statements):
     context.log.info("ingesting data to database")
 
     CONN = psycopg2.connect(
-        host="localhost",
+        host="db",
         user='root',
         password='root',
         database='bike_db'
