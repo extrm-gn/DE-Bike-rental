@@ -31,7 +31,7 @@ def select_cities_to_csv(context):
 
     country_counter = 0
 
-    for i in range(0, 10):
+    for i in range(len(country_unique)):
         #select a country from the unique list of countries
         selected_country = country_unique[country_counter]
 

@@ -43,7 +43,7 @@ def generate_weather_data(context, select_cities_to_csv):
     #placeholder for the temperature that would be appended to the location_df once loop is done
     temp_list = []
 
-    for i in range(10):
+    for i in range(len(location_df)):
 
         #initialized lat and long of the city
         lat = location_df['latitude'][i]
