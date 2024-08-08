@@ -267,11 +267,14 @@ def check_if_empty(table_name):
     cursor = CONN.cursor()
 
     with CONN:
-        cursor.execute("SELECT count(*) FROM {table_name}")
+        query = f"SELECT count(*) FROM {table_name}"
+        cursor.execute(query)
         table_count = cursor.fetchone()[0]
 
-        return table_count
+    cursor.close()
+    CONN.close()
 
+    return table_count
 
 if __name__ == '__main__':
     main()
