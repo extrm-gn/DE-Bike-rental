@@ -6,11 +6,14 @@ import logging
 
 def main():
 
-    print("done inserting data")
+    print("Creating SQL statements.")
 
 
 def generate_sql_statements(csv_filename, table_name, int_columns,
                              str_table_columns, bool_columns = [], str_columns = [], float_columns = []):
+    """
+    Generates sql statements for the country, city, bike_rental and date table
+    """
     df = pd.read_csv(csv_filename)
 
     id_counter = 0
@@ -169,7 +172,6 @@ def ingest(db):
 
     db.commit()
 
-
 @asset
 def generate_country_sql_statements(context, generate_weather_data):
     country_params = {
@@ -182,10 +184,11 @@ def generate_country_sql_statements(context, generate_weather_data):
         expiration_date, status'''
     }
     
-    save_to_sql_file(generate_sql_statements(**country_params), 
-                     '01_country_table_inserts.sql')
-
-    #return generate_sql_statements(**country_params)
+    if check_if_empty('country_table') == 0:
+        save_to_sql_file(generate_sql_statements(**country_params), 
+                        '01_country_table_inserts.sql')
+        
+    return 0
 
 @asset
 def generate_city_sql_statements(context, generate_weather_data):
@@ -196,17 +199,18 @@ def generate_city_sql_statements(context, generate_weather_data):
         'str_table_columns': '''city_id, city_name, city_ISO3, city_capital, city_population, city_latitude, 
         city_longitude, activation_date, expiration_date, status'''
     }
-    save_to_sql_file(generate_sql_statements(**city_params), 
-                     '02_city_table_inserts.sql')
 
-    #return generate_sql_statements(**city_params)
+    if check_if_empty('city_table') == 0:
+        save_to_sql_file(generate_sql_statements(**city_params), 
+                     '02_city_table_inserts.sql')
+        
+    return 0
 
 @asset
 def generate_city_country_statements_asset(context, generate_country_sql_statements, generate_city_sql_statements):
     city_country_statements = generate_city_country_statements('Datasets/city_weather.csv', 'Datasets/worldcities.csv', 
                                                                'Datasets/country_profile_variables.csv', 'city_country_table')
     save_to_sql_file(city_country_statements, '03_city_country_table_inserts.sql')
-
 
 @asset
 def generate_date_sql_statements(context, generate_city_country_statements_asset):
@@ -216,8 +220,11 @@ def generate_date_sql_statements(context, generate_city_country_statements_asset
         'str_table_columns': 'date_id, season, yr, mnth, weekday_, workingday, holiday',
         'bool_columns': ['workingday', 'holiday']
     }
-    save_to_sql_file(generate_sql_statements(**date_params), '04_date_table_inserts.sql')
 
+    if check_if_empty('date_table') == 0:
+        save_to_sql_file(generate_sql_statements(**date_params), '04_date_table_inserts.sql')
+
+    return 0
 
 @asset
 def generate_bike_sql_statements(context,generate_date_sql_statements):
@@ -227,7 +234,10 @@ def generate_bike_sql_statements(context,generate_date_sql_statements):
         'str_table_columns': "date_id, weathersit, casual, registered, cnt, temp, atemp, hum, windspeed"
     }
 
-    save_to_sql_file(generate_sql_statements(**bike_params), '05_bike_rental_inserts.sql')
+    if check_if_empty('bike_rental_table') == 0:
+        save_to_sql_file(generate_sql_statements(**bike_params), '05_bike_rental_inserts.sql')
+
+    return 0
 
 @asset
 def ingest_data(context, generate_bike_sql_statements):
@@ -241,6 +251,26 @@ def ingest_data(context, generate_bike_sql_statements):
         database='bike_db'
     )
     ingest(CONN)
+
+
+def check_if_empty(table_name):
+    """
+    Checks if there are already data inside of table, returns the amount of rows 
+    """
+    CONN = psycopg2.connect(
+        host="db",
+        user='root',
+        password='root',
+        database='bike_db'
+    )
+
+    cursor = CONN.cursor()
+
+    with CONN:
+        cursor.execute("SELECT count(*) FROM {table_name}")
+        table_count = cursor.fetchone()[0]
+
+        return table_count
 
 
 if __name__ == '__main__':
