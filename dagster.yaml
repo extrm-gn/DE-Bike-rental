@@ -1,15 +1,43 @@
-storage:
-  filesystem:
-    base_dir: /dagster/storage
-
 run_storage:
-  filesystem:
-    base_dir: /dagster/run_storage
-
-schedule_storage:
-  filesystem:
-    base_dir: /dagster/schedule_storage
+  module: dagster_postgres.run_storage
+  class: PostgresRunStorage
+  config:
+    postgres_db:
+      username: root
+      password: root
+      hostname: bike_db
+      db_name: bike_db
+      port: 5432
 
 event_log_storage:
-  filesystem:
-    base_dir: /dagster/event_log_storage
+  module: dagster_postgres.event_log
+  class: PostgresEventLogStorage
+  config:
+    postgres_db:
+      username: root
+      password: root
+      hostname: bike_db
+      db_name: bike_db
+      port: 5432
+
+schedule_storage:
+  module: dagster_postgres.schedule_storage
+  class: PostgresScheduleStorage
+  config:
+    postgres_db:
+      username: root
+      password: root
+      hostname: bike_db
+      db_name: bike_db
+      port: 5432
+
+run_coordinator:
+  module: dagster.core.run_coordinator
+  class: QueuedRunCoordinator
+  config:
+    max_concurrent_runs: 5
+
+telemetry:
+  enabled: false
+nux:
+  enabled: false
