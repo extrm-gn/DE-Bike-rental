@@ -53,17 +53,25 @@ services:
       start_period: 30s
       timeout: 5s
       
-  dagster:
-    image: dagster/dagster:latest
+  dagster-dagit:
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
-      - "3000:3000"  
-      - "4000:4000"  
-    volumes:
-      - .:/app 
-      - ./Datasets:/app/Datasets
+      - 3000:3000
     depends_on:
       - db
-    command: dagster dev
+
+  dagster-daemon:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: "dagster-daemon run"
+    environment:
+      - PGPASS=root
+      - PGUID=root
+    depends_on:
+      - db
 
 volumes:
   bike_data:
