@@ -6,7 +6,8 @@ from dagster import asset
 
 
 def main():
-    select_cities_to_csv()
+    #select_cities_to_csv()
+    print("INside city_sampler.py")
 
 @asset
 def select_cities_to_csv(context):
