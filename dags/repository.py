@@ -29,7 +29,7 @@ data_ingestion_job = define_asset_job("data_ingestion_job", selection=AssetSelec
 #initialize dagster schedule that runs the job every minute (for testing purposes)
 ingestion_schedule = ScheduleDefinition(
     job=data_ingestion_job,
-    cron_schedule="* * * * *",  # every minute
+    cron_schedule="*/5 * * * *",  # every 5 minute
 )
 
 @repository
