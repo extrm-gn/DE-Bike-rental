@@ -9,9 +9,9 @@ COPY dagster.yaml .
 COPY workspace.yaml .
 COPY Datasets /app/Datasets
 COPY .env /app/
-COPY city_sampler.py /app/
-COPY data_ingestion.py /app/
-COPY generate_sql_inserts.py /app/
+COPY dags/city_sampler.py /app/
+COPY dags/data_ingestion.py /app/
+COPY dags/generate_sql_inserts.py /app/
 COPY dags/repository.py /app/dags/repository.py
 
 EXPOSE 3000
